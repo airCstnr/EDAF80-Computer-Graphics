@@ -13,6 +13,7 @@ set (
 	ASSIGNMENT1_SOURCES
 
 	"assignment1.cpp"
+	"CelestialBody.cpp"
 )
 
 set (
