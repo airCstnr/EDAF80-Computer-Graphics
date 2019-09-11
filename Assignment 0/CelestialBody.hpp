@@ -2,6 +2,7 @@
 
 #include "core/helpers.hpp"
 #include "core/node.hpp"
+#include "glm/vec3.hpp"
 
 /** EDAF 80
  * Raphael Castanier / Niklas Karlsson
@@ -29,6 +30,22 @@ public:
 				 glm::mat4 const& view_projection,
 				 glm::mat4 const& parent_transform = glm::mat4( 1.0f ) );
 
+	/** Will scale the geometry( to atten the earth at the poles, for example ), and store the value as a new attribute */
+	void set_scale( glm::vec3 const& scale );
+
+	/**  
+	 * \param spinning_axis
+	 * \param spinning_axis rad/sec
+	 * \param initial_spin_angle rad
+	 */
+	void set_spinning( glm::vec3 const& spinning_axis,
+					   float spinning_speed,
+					   float initial_spin_angle = 0.0f );
+
 private:
 	Node _node;
+	glm::vec3 _scale;
+	glm::vec3 _spinning_axis;
+	float _spinning_speed; // radians/sec
+	float _spin_angle; // radians
 };

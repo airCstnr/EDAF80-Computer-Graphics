@@ -16,6 +16,9 @@
 
 #include "CelestialBody.hpp"
 
+#include "glm/trigonometric.hpp"
+#include "glm/gtc/constants.hpp"
+
 int main()
 {
 	//
@@ -101,6 +104,11 @@ int main()
 	//sun_node.add_texture("diffuse_texture", sun_texture, GL_TEXTURE_2D);
 	//float const sun_spin_speed = glm::two_pi<float>() / 6.0f; // Full rotation in six seconds
 
+	// Set sun scale
+	//sun_node.set_scale( glm::vec3( 0.5, 0.5, 0.5 ) );
+
+	// Set spinning
+	sun_node.set_spinning( glm::vec3( 1, 0, 0 ), glm::pi<float>(), glm::radians( 45.0 ) );
 
 	Node solar_system_node;
 	//solar_system_node.add_child(&sun_node);
@@ -188,7 +196,7 @@ int main()
 		// TODO: Replace this explicit rendering of the Sun with a
 		// traversal of the scene graph and rendering of all its nodes.
 		//sun_node.render(camera.GetWorldToClipMatrix());
-		sun_node.render( 0, matrix_stack.top() );
+		sun_node.render( delta_time, camera.GetWorldToClipMatrix() );
 
 
 		//
