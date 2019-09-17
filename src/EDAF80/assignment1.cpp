@@ -20,6 +20,11 @@
 
 #include "glm/gtc/constants.hpp"
 
+/*
+	EDAF 80 Fall 2019
+	Raphael Castanier
+	Niklas Karlsson
+*/
 
 int main()
 {
@@ -95,18 +100,27 @@ int main()
 	}
 
 
-	//
-	// Set up the sun node and other related attributes
-	//
-
 	//---------------------------------------------------------------------------------------------------------------------------------------------
-	//Lab0 modifications
+	//Lab modifications
 
-	GLuint const sun_texture = bonobo::loadTexture2D("sunmap.png"); //load the texture 
+	//Set up the sun node and other related attributes
+	GLuint const sun_texture = bonobo::loadTexture2D("sunmap.png"); //load the texture
 	CelestialBody sun_node(sphere, &celestial_body_shader, sun_texture); //create the celestialBody node 
 	sun_node.set_scale(glm::vec3(0.5, 0.5, 0.5)); //scaling
 	sun_node.set_spinning(glm::radians(10.0), glm::pi<float>(), glm::radians(45.0)); //spinning
 	sun_node.set_orbit(0.0f, glm::radians(10.0f), 2.0f, 0.0f); // orbiting
+
+	/*
+	Create a ring shape
+	Arguments:
+		radial_resolution = how many vertices will be present across a radial cut of the ring
+		angular_resolution = how many vertices will be used to form the outer border of the ring
+		inner_radius = the discance between the center and the inner border of the ring
+		outer_radius = the distance between the center and the outer border of the ring
+	*/
+
+	parametric_shapes::createCircleRing(10, 256, 1.2f, 2.0f);
+	GLuint const saturn_texture = bonobo::loadTexture2D("saturnmap.jpg"); //load the texture
 
 	//---------------------------------------------------------------------------------------------------------------------------------------------
 

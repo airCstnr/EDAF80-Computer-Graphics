@@ -2,6 +2,12 @@
 #include "core/node.hpp"
 #include "glm/vec3.hpp"
 
+/*
+	EDAF 80 Fall 2019
+	Raphael Castanier
+	Niklas Karlsson
+*/
+
 class CelestialBody
 {
 public:
@@ -39,10 +45,37 @@ public:
 					float orbit_speed,
 					float orbit_radius,
 					float initial_orbit_angle = 0.0f);
+	/*
+	Shape = the shape to use for the rings
+	scaling = how to scale the ring along the x- and y-axis (assuming you are looking at it from the top)
+	program = the ID of the shader program used to render the rings
+	diffuse_texture_id = the ID of the diffuse texture
+	opacity texture_id = the ID of the opacity texture
+	*/
+	void add_rings(	bonobo::mesh_data const& shape,
+					glm::vec2 const& scaling,
+					GLuint const* program, GLuint diffuse_texture_id,
+					GLuint opacity_texture_id);
+
+	void add_child(CelestialBody* child);
+
+	std::vector<CelestialBody*> const& get_children() const;
+
+	glm::mat4 get_transform() const;
 
 private:
+
+	//Nodes
 	Node _node;
+	Node _rings_node;
+
+	//Vectors
 	glm::vec3 _scale;
+
+	//Matrices
+	glm::mat4 orbit_matrix;
+
+	//Float
 	float _spinning_inclination;
 	float _spinning_speed; //radians/s
 	float _spin_angle; //radians
@@ -50,4 +83,6 @@ private:
 	float _orbit_speed;
 	float _orbit_radius;
 	float _orbit_angle;
+
+	std::vector<CelestialBody*> _child;
 };
