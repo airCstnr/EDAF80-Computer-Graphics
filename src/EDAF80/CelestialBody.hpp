@@ -54,7 +54,8 @@ public:
 	*/
 	void add_rings(	bonobo::mesh_data const& shape,
 					glm::vec2 const& scaling,
-					GLuint const* program, GLuint diffuse_texture_id,
+					GLuint const* program,
+					GLuint diffuse_texture_id,
 					GLuint opacity_texture_id);
 
 	void add_child(CelestialBody* child);
@@ -73,7 +74,7 @@ private:
 	glm::vec3 _scale;
 
 	//Matrices
-	glm::mat4 orbit_matrix;
+	glm::mat4 _orbit_matrix;
 
 	//Float
 	float _spinning_inclination;
@@ -84,5 +85,5 @@ private:
 	float _orbit_radius;
 	float _orbit_angle;
 
-	std::vector<CelestialBody*> _child;
+	std::vector<CelestialBody*> _children_nodes;
 };

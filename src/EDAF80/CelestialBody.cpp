@@ -16,6 +16,7 @@ CelestialBody::CelestialBody(	bonobo::mesh_data const & shape,
 	//vectors
 	_scale(1), //passing one argument to a vector makes all values the same, in this case (1,1,1)
 	//floats 
+	_spinning_inclination(0),
 	_spinning_speed(0),
 	_spin_angle(0),
 	_orbit_inclination(0),
@@ -59,7 +60,7 @@ void CelestialBody::render(	float ellapsed_time,
 	spin_matrix = glm::rotate(glm::mat4(1.0f), _spin_angle, glm::vec3(0, 1, 0));
 
 	//Compute the orbit matrix
-	orbit_matrix = glm::rotate(glm::mat4(1.0f), _orbit_angle, glm::vec3(0, 1, 0));
+	_orbit_matrix = glm::rotate(glm::mat4(1.0f), _orbit_angle, glm::vec3(0, 1, 0));
 
 	//Compute the translation matrix
 	glm::mat4 translation_matrix = glm::mat4(1.0f);
@@ -79,7 +80,7 @@ void CelestialBody::render(	float ellapsed_time,
 	//"The most right matrix gets applied first" 
 	//"Apply the tilt matrix AFTER the spin/rotation matrix"
 	glm::mat4 matrix;
-	matrix = orbit_tilt_matrix * orbit_matrix * translation_matrix * spinning_tilt_matrix * spin_matrix  * scaled_matrix;
+	matrix = orbit_tilt_matrix * _orbit_matrix * translation_matrix * spinning_tilt_matrix * spin_matrix  * scaled_matrix;
 	
 	//Call the render function and forward the two matrices
 	_node.render(view_projection, matrix);
@@ -117,7 +118,8 @@ void CelestialBody::set_orbit(	float orbit_inclination,
 
 void CelestialBody::add_rings(	bonobo::mesh_data const& shape,
 								glm::vec2 const& scaling,
-								GLuint const* program, GLuint diffuse_texture_id,
+								GLuint const* program,
+								GLuint diffuse_texture_id,
 								GLuint opacity_texture_id)
 {
 	//Forward the shape
@@ -133,15 +135,15 @@ void CelestialBody::add_rings(	bonobo::mesh_data const& shape,
 
 void CelestialBody::add_child(CelestialBody* child)
 {
-
+	_children_nodes.push_back( child );
 }
 
 std::vector<CelestialBody*> const& CelestialBody::get_children() const
 {
-	return _child;
+	return _children_nodes;
 }
 
 glm::mat4 CelestialBody::get_transform() const
 {
-	return orbit_matrix;
+	return _orbit_matrix;
 }

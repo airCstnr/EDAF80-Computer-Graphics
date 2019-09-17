@@ -118,9 +118,24 @@ int main()
 		inner_radius = the discance between the center and the inner border of the ring
 		outer_radius = the distance between the center and the outer border of the ring
 	*/
+	bonobo::mesh_data rings_shape = parametric_shapes::createCircleRing(10, 256, 1.2f, 2.0f);
 
-	parametric_shapes::createCircleRing(10, 256, 1.2f, 2.0f);
-	GLuint const saturn_texture = bonobo::loadTexture2D("saturnmap.jpg"); //load the texture
+	/*
+	Load textures from res/textures folder.
+		Diffuse texture : http://planetpixelemporium.com/download/download.php?saturnringcolor.jpg
+		Opacity texture : http://planetpixelemporium.com/download/download.php?saturnringpattern.gif
+		The diffuse texture uses the name "diffuse_texture" and is of type GL_TEXTURE_2D
+		the opacity texture uses the name "opacity_texture" but is also of type GL_TEXTURE_2D
+	*/
+	GLuint const rings_diffuse_texture = bonobo::loadTexture2D( "saturnringcolor.jpg" ); //load the texture
+	GLuint const rings_opacity_texture = bonobo::loadTexture2D( "saturnringpattern.gif" ); //load the texture
+
+	// Add rings to sun
+	sun_node.add_rings( rings_shape,
+						{ 0, 0 },
+						&celestial_ring_shader,
+						rings_diffuse_texture,
+						rings_opacity_texture);
 
 	//---------------------------------------------------------------------------------------------------------------------------------------------
 
