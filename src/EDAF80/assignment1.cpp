@@ -11,7 +11,7 @@
 #include <external/imgui_impl_glfw_gl3.h>
 
 #include <stack>
-
+#include <set>
 #include <cstdlib>
 
 #include "CelestialBody.hpp"
@@ -219,12 +219,39 @@ int main()
 		//
 		// Traverse the scene graph and render all nodes
 		//
-		std::stack<Node const*> node_stack({ &solar_system_node });
+		std::stack<CelestialBody*> node_stack({ &sun_node });
+		std::set<CelestialBody*> discovered_nodes;
 		std::stack<glm::mat4> matrix_stack({ glm::mat4(1.0f) });
-		// TODO: Replace this explicit rendering of the Sun with a
+
 		// traversal of the scene graph and rendering of all its nodes.
-		//sun_node.render(camera.GetWorldToClipMatrix());
-		sun_node.render(delta_time, camera.GetWorldToClipMatrix());
+		/*
+		Pseudocode from https://en.wikipedia.org/wiki/Depth-first_search#Pseudocode
+		1  procedure DFS-iterative(G,v):
+		2      let S be a stack
+		3      S.push(v)
+		4      while S is not empty
+		5          v = S.pop()
+		6          if v is not labeled as discovered:
+		7              label v as discovered
+		8              for all edges from v to w in G.adjacentEdges(v) do
+		9                  S.push(w)
+		*/
+		CelestialBody* current_node = node_stack.top();
+		while(!node_stack.empty()) {
+			current_node = node_stack.top();
+
+			// render
+			current_node->render( delta_time, camera.GetWorldToClipMatrix() );
+
+			// traverse children
+			node_stack.pop();
+			if(discovered_nodes.find( current_node ) == discovered_nodes.end()) {
+				discovered_nodes.insert( current_node );
+				for(auto child : current_node->get_children()) {
+					node_stack.push( child );
+				}
+			}
+		}
 
 		//
 		// Display Dear ImGui windows
