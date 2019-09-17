@@ -17,7 +17,9 @@
 #include "CelestialBody.hpp"
 
 #include "glm/trigonometric.hpp"
+
 #include "glm/gtc/constants.hpp"
+
 
 int main()
 {
@@ -31,8 +33,8 @@ int main()
 	//
 	InputHandler input_handler;
 	FPSCameraf camera(0.5f * glm::half_pi<float>(),
-	                  static_cast<float>(config::resolution_x) / static_cast<float>(config::resolution_y),
-	                  0.01f, 1000.0f);
+		static_cast<float>(config::resolution_x) / static_cast<float>(config::resolution_y),
+		0.01f, 1000.0f);
 	camera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
 	camera.mMouseSensitivity = 0.003f;
 	camera.mMovementSpeed = 0.25f * 12.0f;
@@ -41,7 +43,7 @@ int main()
 	// Create the window
 	//
 	WindowManager& window_manager = framework.GetWindowManager();
-	WindowManager::WindowDatum window_datum{ input_handler, camera, config::resolution_x, config::resolution_y, 0, 0, 0, 0};
+	WindowManager::WindowDatum window_datum{ input_handler, camera, config::resolution_x, config::resolution_y, 0, 0, 0, 0 };
 	GLFWwindow* window = window_manager.CreateGLFWWindow("EDAF80: Assignment 1", window_datum, config::msaa_rate);
 	if (window == nullptr) {
 		LogError("Failed to get a window: exiting.");
@@ -67,9 +69,9 @@ int main()
 	ShaderProgramManager program_manager;
 	GLuint celestial_body_shader = 0u;
 	program_manager.CreateAndRegisterProgram("Celestial Body",
-	                                         { { ShaderType::vertex, "EDAF80/default.vert" },
-	                                           { ShaderType::fragment, "EDAF80/default.frag" } },
-	                                         celestial_body_shader);
+		{ { ShaderType::vertex, "EDAF80/default.vert" },
+		  { ShaderType::fragment, "EDAF80/default.frag" } },
+		celestial_body_shader);
 	if (celestial_body_shader == 0u) {
 		LogError("Failed to generate the “Celestial Body” shader program: exiting.");
 
@@ -80,9 +82,9 @@ int main()
 	}
 	GLuint celestial_ring_shader = 0u;
 	program_manager.CreateAndRegisterProgram("Celestial Ring",
-	                                         { { ShaderType::vertex, "EDAF80/celestial_ring.vert" },
-	                                           { ShaderType::fragment, "EDAF80/celestial_ring.frag" } },
-	                                         celestial_ring_shader);
+		{ { ShaderType::vertex, "EDAF80/celestial_ring.vert" },
+		  { ShaderType::fragment, "EDAF80/celestial_ring.frag" } },
+		celestial_ring_shader);
 	if (celestial_ring_shader == 0u) {
 		LogError("Failed to generate the “Celestial Ring” shader program: exiting.");
 
@@ -96,23 +98,20 @@ int main()
 	//
 	// Set up the sun node and other related attributes
 	//
-	GLuint const sun_texture = bonobo::loadTexture2D("sunmap.png");
-	CelestialBody sun_node( sphere, &celestial_body_shader, sun_texture );
-	//sun_node.set_geometry(sphere);
-	//sun_node.set_program(&celestial_body_shader, [](GLuint /*program*/){});
-	//TRSTransformf& sun_transform_reference = sun_node.get_transform();
-	//sun_node.add_texture("diffuse_texture", sun_texture, GL_TEXTURE_2D);
-	//float const sun_spin_speed = glm::two_pi<float>() / 6.0f; // Full rotation in six seconds
 
-	// Set sun scale
-	//sun_node.set_scale( glm::vec3( 0.5, 0.5, 0.5 ) );
+	//---------------------------------------------------------------------------------------------------------------------------------------------
+	//Lab0 modifications
 
-	// Set spinning
-	sun_node.set_spinning( glm::vec3( 1, 0, 0 ), glm::pi<float>(), glm::radians( 45.0 ) );
+	GLuint const sun_texture = bonobo::loadTexture2D("sunmap.png"); //load the texture 
+	CelestialBody sun_node(sphere, &celestial_body_shader, sun_texture); //create the celestialBody node 
+	sun_node.set_scale(glm::vec3(0.5, 0.5, 0.5)); //scaling
+	sun_node.set_spinning(glm::radians(10.0), glm::pi<float>(), glm::radians(45.0)); //spinning
+	sun_node.set_orbit(0.0f, glm::radians(10.0f), 2.0f, 0.0f); // orbiting
+
+	//---------------------------------------------------------------------------------------------------------------------------------------------
 
 	Node solar_system_node;
 	//solar_system_node.add_child(&sun_node);
-
 
 	//
 	// TODO: Create nodes for the remaining of the solar system
@@ -196,8 +195,7 @@ int main()
 		// TODO: Replace this explicit rendering of the Sun with a
 		// traversal of the scene graph and rendering of all its nodes.
 		//sun_node.render(camera.GetWorldToClipMatrix());
-		sun_node.render( delta_time, camera.GetWorldToClipMatrix() );
-
+		sun_node.render(delta_time, camera.GetWorldToClipMatrix());
 
 		//
 		// Display Dear ImGui windows
