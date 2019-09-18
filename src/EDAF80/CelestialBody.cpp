@@ -78,7 +78,7 @@ void CelestialBody::render(	float ellapsed_time,
 
 	//Combine the matrices
 	//"The most right matrix gets applied first" 
-	//"Apply the tilt matrix AFTER the spin/rotation matrix"
+	//"Apply the tilt matrix AFTER the spin/orbit matrix"
 	glm::mat4 matrix;
 	matrix = orbit_tilt_matrix * _orbit_matrix * translation_matrix * spinning_tilt_matrix * spin_matrix  * scaled_matrix;
 	
@@ -135,12 +135,12 @@ void CelestialBody::add_rings(	bonobo::mesh_data const& shape,
 
 void CelestialBody::add_child(CelestialBody* child)
 {
-	_children_nodes.push_back( child );
+	_children_nodes.push_back( child ); //adds the pointer to the new child at the end of the vector
 }
 
 std::vector<CelestialBody*> const& CelestialBody::get_children() const
 {
-	return _children_nodes;
+	return _children_nodes; //returns the vector with all children
 }
 
 glm::mat4 CelestialBody::get_transform() const

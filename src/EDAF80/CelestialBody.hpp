@@ -85,5 +85,5 @@ private:
 	float _orbit_radius;
 	float _orbit_angle;
 
-	std::vector<CelestialBody*> _children_nodes;
+	std::vector<CelestialBody*> _children_nodes; //vector with pointers to children
 };
