@@ -104,11 +104,11 @@ int main()
 	//Lab modifications
 
 	//Set up the sun node and other related attributes
-	GLuint const sun_texture = bonobo::loadTexture2D("sunmap.png"); //load the texture
-	CelestialBody sun_node(sphere, &celestial_body_shader, sun_texture); //create the celestialBody node 
-	sun_node.set_scale(glm::vec3(0.5, 0.5, 0.5)); //scaling
+	GLuint const sun_texture = bonobo::loadTexture2D("sunmap.png");					 //load the texture
+	CelestialBody sun_node(sphere, &celestial_body_shader, sun_texture);			 //create the celestialBody node 
+	sun_node.set_scale(glm::vec3(0.5, 0.5, 0.5));									 //scaling
 	sun_node.set_spinning(glm::radians(10.0), glm::pi<float>(), glm::radians(45.0)); //spinning
-	sun_node.set_orbit(0.0f, glm::radians(10.0f), 0.0f, 0.0f); // orbiting
+	sun_node.set_orbit(0.0f, glm::radians(10.0f), 0.0f, 0.0f);						 // orbiting
 
 	/*
 	Create a ring shape
@@ -151,14 +151,14 @@ int main()
 	CelestialBody earth_node( sphere, &celestial_body_shader, earth_texture );				 // create the earth node 
 	earth_node.set_scale( glm::vec3( 0.25, 0.25, 0.25 ) );									 // set scaling
 	earth_node.set_spinning( glm::radians( 10.0 ), glm::pi<float>(), glm::radians( 45.0 ) ); // set spinning
-	earth_node.set_orbit( 0.0f, glm::radians( 180.0f ), 2 );								 // set orbiting
+	earth_node.set_orbit( 0.0f, glm::radians( 180.0f ), 3 );								 // set orbiting
 
 	// Set up the Moon node and other related attributes
 	GLuint const moon_texture = bonobo::loadTexture2D( "noise.png" );						 // load the texture
 	CelestialBody moon_node( sphere, &celestial_body_shader, moon_texture );				 // create the moon node 
 	moon_node.set_scale( glm::vec3( 0.25, 0.25, 0.25 ) );									 // set scaling
 	moon_node.set_spinning( glm::radians( 10.0 ), glm::pi<float>(), glm::radians( 45.0 ) );  // set spinning
-	moon_node.set_orbit( 0.0f, glm::radians( 180.0f ), 3.5 );								 // set orbiting
+	moon_node.set_orbit( 0.0f, glm::radians( 180.0f ), 1 );									 // set orbiting
 
 	// Make the Earth a child of the Sun, and the Moon a child of the Earth
 	sun_node.add_child( &earth_node );
@@ -253,20 +253,24 @@ int main()
 		8              for all edges from v to w in G.adjacentEdges(v) do
 		9                  S.push(w)
 		*/
-		CelestialBody* current_node = node_stack.top();
+		CelestialBody* current_node = NULL;
+		glm::mat4 current_matrix;
 		while(!node_stack.empty()) {
+			// get current node and transform matrix
 			current_node = node_stack.top();
+			current_matrix = matrix_stack.top();
 
-			// render
-			current_node->render( delta_time, camera.GetWorldToClipMatrix() );
+			// render using proper world matrix
+			current_node->render( delta_time, camera.GetWorldToClipMatrix(), current_matrix );
+
+			// remove current nodes from stacks
+			node_stack.pop();
+			matrix_stack.pop();
 
 			// traverse children
-			node_stack.pop();
-			if(discovered_nodes.find( current_node ) == discovered_nodes.end()) {
-				discovered_nodes.insert( current_node );
-				for(auto child : current_node->get_children()) {
-					node_stack.push( child );
-				}
+			for(auto child : current_node->get_children()) {
+				node_stack.push( child );
+				matrix_stack.push( current_matrix * current_node->get_transform() );
 			}
 		}
 

@@ -74,7 +74,7 @@ private:
 	glm::vec3 _scale;
 
 	//Matrices
-	glm::mat4 _orbit_matrix;
+	glm::mat4 _transform_matrix;
 
 	//Float
 	float _spinning_inclination;
