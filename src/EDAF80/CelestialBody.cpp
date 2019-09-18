@@ -60,28 +60,32 @@ void CelestialBody::render(	float ellapsed_time,
 	spin_matrix = glm::rotate(glm::mat4(1.0f), _spin_angle, glm::vec3(0, 1, 0));
 
 	//Compute the orbit matrix
-	_orbit_matrix = glm::rotate(glm::mat4(1.0f), _orbit_angle, glm::vec3(0, 1, 0));
+	glm::mat4 orbit_matrix;
+	orbit_matrix = glm::rotate(glm::mat4(1.0f), _orbit_angle, glm::vec3(0, 1, 0));
 
 	//Compute the translation matrix
 	glm::mat4 translation_matrix = glm::mat4(1.0f);
 	translation_matrix[3][0] = _orbit_radius; //glm defaults to [col][row]
 
-	//Compute the title matrix
-	//"The matrix is a a roatiation of angle _spinning_inclination around the z-axis"
+	//Compute the orbit tilt matrix
+	//"The matrix is a a roatiation of angle _orbit_inclination around the z-axis"
 	glm::mat4 orbit_tilt_matrix;
 	orbit_tilt_matrix = glm::rotate(glm::mat4(1.0f), _orbit_inclination, glm::vec3(0,0,1));
 
-	//Compute the spinningtilt_matrix 
+	//Compute the spinning tilt matrix 
 	//"The matrix is a a roatiation of angle _spinning_inclination around the z-axis"
 	glm::mat4 spinning_tilt_matrix;
 	spinning_tilt_matrix = glm::rotate(glm::mat4(1.0f), _spinning_inclination, glm::vec3(0, 0, 1));
+
+	//Compute the transform matrix
+	_transform_matrix = orbit_tilt_matrix * orbit_matrix * translation_matrix;
 
 	//Combine the matrices
 	//"The most right matrix gets applied first" 
 	//"Apply the tilt matrix AFTER the spin/orbit matrix"
 	glm::mat4 matrix;
-	matrix = orbit_tilt_matrix * _orbit_matrix * translation_matrix * spinning_tilt_matrix * spin_matrix  * scaled_matrix;
-	
+	matrix = parent_transform * _transform_matrix * spinning_tilt_matrix * spin_matrix  * scaled_matrix;
+
 	//Call the render function and forward the two matrices
 	_node.render(view_projection, matrix);
 
@@ -145,5 +149,5 @@ std::vector<CelestialBody*> const& CelestialBody::get_children() const
 
 glm::mat4 CelestialBody::get_transform() const
 {
-	return _orbit_matrix;
+	return _transform_matrix;
 }
