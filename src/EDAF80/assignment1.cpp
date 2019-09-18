@@ -104,44 +104,14 @@ int main()
 	//---------------------------------------------------------------------------------------------------------------------------------------------
 	//Lab modifications
 
-	//Set up the sun node and other related attributes
+	//Set up the Sun node and other related attributes
 	GLuint const sun_texture = bonobo::loadTexture2D("sunmap.png");						//load the texture
 	CelestialBody sun_node(sphere, &celestial_body_shader, sun_texture);				//create the celestialBody node 
 	sun_node.set_scale(glm::vec3(0.5, 0.5, 0.5));										//scaling
 	sun_node.set_spinning(glm::radians(10.0), glm::pi<float>(), glm::radians(45.0));	//spinning
 	sun_node.set_orbit(0.0f, glm::radians(10.0f), 0.0f, 0.0f);							// orbiting
 
-	/*
-	Create a ring shape
-	Arguments:
-		radial_resolution = how many vertices will be present across a radial cut of the ring
-		angular_resolution = how many vertices will be used to form the outer border of the ring
-		inner_radius = the discance between the center and the inner border of the ring
-		outer_radius = the distance between the center and the outer border of the ring
-	*/
-	bonobo::mesh_data rings_shape = parametric_shapes::createCircleRing(10, 256, 1.2f, 2.0f);
-
-	/*
-	Load textures from res/textures folder.
-		Diffuse texture : http://planetpixelemporium.com/download/download.php?saturnringcolor.jpg
-		Opacity texture : http://planetpixelemporium.com/download/download.php?saturnringpattern.gif
-		The diffuse texture uses the name "diffuse_texture" and is of type GL_TEXTURE_2D
-		the opacity texture uses the name "opacity_texture" but is also of type GL_TEXTURE_2D
-	*/
-	GLuint const rings_diffuse_texture = bonobo::loadTexture2D( "saturnringcolor.jpg" ); //load the texture
-	GLuint const rings_opacity_texture = bonobo::loadTexture2D( "saturnringpattern.gif" ); //load the texture
-	// TODO : move sun rings to satrun node :)
-
-	// Add rings to sun
-	sun_node.add_rings( rings_shape,
-						{ 0, 0 },
-						&celestial_ring_shader,
-						rings_diffuse_texture,
-						rings_opacity_texture);
-
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-
-	Node solar_system_node;
+	//Node solar_system_node;
 	//solar_system_node.add_child(&sun_node);
 
 	//
@@ -218,6 +188,34 @@ int main()
 	pluto_node.set_scale( glm::vec3( 0.1, 0.1, 0.1 ) );												// set scaling
 	pluto_node.set_spinning( 123, (2.0 * glm::pi<float>()) / 19, glm::radians( 45.0 ) );			// set spinning
 	pluto_node.set_orbit( 11.0f, (2.0 * glm::pi<float>()) / 10000, 20.0 );							// set orbiting
+
+	/*
+	Create a ring shape
+	Arguments:
+		radial_resolution = how many vertices will be present across a radial cut of the ring
+		angular_resolution = how many vertices will be used to form the outer border of the ring
+		inner_radius = the discance between the center and the inner border of the ring
+		outer_radius = the distance between the center and the outer border of the ring
+	*/
+	bonobo::mesh_data rings_shape = parametric_shapes::createCircleRing( 10, 256, 1.2f, 2.0f );
+
+	/*
+	Load textures from res/textures folder.
+		Diffuse texture : http://planetpixelemporium.com/download/download.php?saturnringcolor.jpg
+		Opacity texture : http://planetpixelemporium.com/download/download.php?saturnringpattern.gif
+		The diffuse texture uses the name "diffuse_texture" and is of type GL_TEXTURE_2D
+		the opacity texture uses the name "opacity_texture" but is also of type GL_TEXTURE_2D
+	*/
+	GLuint const saturn_rings_diffuse_texture = bonobo::loadTexture2D( "saturnringcolor.jpg" ); //load the texture
+	GLuint const saturn_rings_opacity_texture = bonobo::loadTexture2D( "saturnringpattern.gif" ); //load the texture
+
+	// Add rings to Saturn
+	saturn_node.add_rings( rings_shape, { 0, 0 }, &celestial_ring_shader, saturn_rings_diffuse_texture, saturn_rings_opacity_texture );
+
+	// Add rings to Uranus
+	GLuint const uranus_rings_diffuse_texture = bonobo::loadTexture2D( "uranusringcolour.jpg" ); //load the texture
+	GLuint const uranus_rings_opacity_texture = bonobo::loadTexture2D( "uranusringtrans.gif" ); //load the texture
+	neptune_node.add_rings( rings_shape, { 0, 0 }, &celestial_ring_shader, uranus_rings_diffuse_texture, uranus_rings_opacity_texture );
 
 	// Make the Earth a child of the Sun, and the Moon a child of the Earth
 	sun_node.add_child( &mercury_node);
