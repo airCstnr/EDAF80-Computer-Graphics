@@ -130,6 +130,7 @@ int main()
 	*/
 	GLuint const rings_diffuse_texture = bonobo::loadTexture2D( "saturnringcolor.jpg" ); //load the texture
 	GLuint const rings_opacity_texture = bonobo::loadTexture2D( "saturnringpattern.gif" ); //load the texture
+	// TODO : move sun rings to satrun node :)
 
 	// Add rings to sun
 	sun_node.add_rings( rings_shape,
@@ -169,7 +170,6 @@ int main()
 	earth_node.set_spinning( glm::radians( 10.0 ), glm::pi<float>(), glm::radians( 45.0 ) );		// set spinning
 	earth_node.set_orbit( 0.0f, glm::radians( 180.0f ), 4 );										// set orbiting
 
-
 	// Set up the Moon node and other related attributes
 	GLuint const moon_texture = bonobo::loadTexture2D( "noise.png" );								// load the texture
 	CelestialBody moon_node( sphere, &celestial_body_shader, moon_texture );						// create the moon node 
@@ -179,10 +179,45 @@ int main()
 
 	// Set up the Mars node and other related attributes
 	GLuint const mars_texture = bonobo::loadTexture2D("marsmap1k.jpg");								// load the texture
-	CelestialBody mars_node(sphere, &celestial_body_shader, moon_texture);							// create the moon node 
+	CelestialBody mars_node(sphere, &celestial_body_shader, mars_texture);							// create the mars node
 	mars_node.set_scale(glm::vec3(0.03, 0.03, 0.03));												// set scaling
 	mars_node.set_spinning(glm::radians(25.0), (2.0 * glm::pi<float>())/3, glm::radians(45.0));		// set spinning
 	mars_node.set_orbit(5.7f, (2.0 * glm::pi<float>()) / 36, 5.0);									// set orbiting
+
+	// Set up the Jupiter node and other related attributes
+	GLuint const jupiter_texture = bonobo::loadTexture2D( "jupitermap1k.jpg" );						// load the texture
+	CelestialBody jupiter_node( sphere, &celestial_body_shader, jupiter_texture );					// create the jupiter node
+	jupiter_node.set_scale( glm::vec3( 0.5, 0.5, 0.5 ) );											// set scaling
+	jupiter_node.set_spinning( 3.1, (2.0 * glm::pi<float>()), glm::radians( 45.0 ) );				// set spinning
+	jupiter_node.set_orbit( 6.1f, (2.0 * glm::pi<float>()) / 220, 13.0 );							// set orbiting
+
+	// Set up the Saturn node and other related attributes
+	GLuint const saturn_texture = bonobo::loadTexture2D( "saturnmap.jpg" );							// load the texture
+	CelestialBody saturn_node( sphere, &celestial_body_shader, saturn_texture );					// create the saturn node
+	saturn_node.set_scale( glm::vec3( 0.4, 0.4, 0.4 ) );											// set scaling
+	saturn_node.set_spinning( 27, (2.0 * glm::pi<float>()) / 1.2, glm::radians( 45.0 ) );			// set spinning
+	saturn_node.set_orbit( 5.5f, (2.0 * glm::pi<float>()) / 400, 16.0 );							// set orbiting
+
+	// Set up the Uranus node and other related attributes
+	GLuint const uranus_texture = bonobo::loadTexture2D( "uranusmap.jpg" );							// load the texture
+	CelestialBody uranus_node( sphere, &celestial_body_shader, uranus_texture );					// create the uranus node
+	uranus_node.set_scale( glm::vec3( 0.2, 0.2, 0.2 ) );											// set scaling
+	uranus_node.set_spinning( 98.0, (2.0 * glm::pi<float>()) / 2, glm::radians( 45.0 ) );			// set spinning
+	uranus_node.set_orbit( 6.5f, (2.0 * glm::pi<float>()) / 1680, 18.0 );							// set orbiting
+
+	// Set up the Neptune node and other related attributes
+	GLuint const neptune_texture = bonobo::loadTexture2D( "neptunemap.jpg" );						// load the texture
+	CelestialBody neptune_node( sphere, &celestial_body_shader, neptune_texture );					// create the neptune node
+	neptune_node.set_scale( glm::vec3( 0.2, 0.2, 0.2 ) );											// set scaling
+	neptune_node.set_spinning( 28.0, (2.0 * glm::pi<float>()) / 2, glm::radians( 45.0 ) );			// set spinning
+	neptune_node.set_orbit( 6.4f, (2.0 * glm::pi<float>()) / 3200, 19.0 );							// set orbiting
+
+	// Set up the Pluto node and other related attributes
+	GLuint const pluto_texture = bonobo::loadTexture2D( "plutomap1k.jpg" );							// load the texture
+	CelestialBody pluto_node( sphere, &celestial_body_shader, pluto_texture );						// create the pluto node
+	pluto_node.set_scale( glm::vec3( 0.1, 0.1, 0.1 ) );												// set scaling
+	pluto_node.set_spinning( 123, (2.0 * glm::pi<float>()) / 19, glm::radians( 45.0 ) );			// set spinning
+	pluto_node.set_orbit( 11.0f, (2.0 * glm::pi<float>()) / 10000, 20.0 );							// set orbiting
 
 	// Make the Earth a child of the Sun, and the Moon a child of the Earth
 	sun_node.add_child( &mercury_node);
@@ -190,6 +225,11 @@ int main()
 	sun_node.add_child( &earth_node );
 	sun_node.add_child( &mars_node);
 	earth_node.add_child( &moon_node );
+	sun_node.add_child( &jupiter_node );
+	sun_node.add_child( &saturn_node );
+	sun_node.add_child( &uranus_node );
+	sun_node.add_child( &neptune_node );
+	sun_node.add_child( &pluto_node );
 
 	// Retrieve the actual framebuffer size: for HiDPI monitors, you might
 	// end up with a framebuffer larger than what you actually asked for.
