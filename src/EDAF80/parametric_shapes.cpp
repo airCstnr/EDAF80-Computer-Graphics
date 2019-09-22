@@ -12,6 +12,9 @@
 bonobo::mesh_data
 parametric_shapes::createQuad(unsigned int width, unsigned int height)
 {
+	//
+	// Note RC : Not sure what is expected here... :/
+	//
 	//! \todo Fill in the blanks
 	auto const vertices = std::array<glm::vec3, 4>{
 		glm::vec3(0.0f,                      0.0f,                       0.0f),
@@ -20,6 +23,27 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 		glm::vec3(0.0f,                      static_cast<float>(height), 0.0f)
 	};
 
+	/*
+		Note RC : How I understand the following indices :
+		  -->
+		2 --- 3
+		| \ /
+		|  X
+		| / \
+		0 --- 1
+		  -->
+		Should it be more like this?
+		  <--
+		2 --- 3
+		| \   |
+		|  \  |
+		|   \ |
+		0 --- 1
+		  -->
+		glm::uvec3(0u, 1u, 2u),
+		glm::uvec3(1u, 3u, 2u)
+
+	*/
 	auto const indices = std::array<glm::uvec3, 2>{
 		glm::uvec3(0u, 1u, 2u),
 		glm::uvec3(0u, 2u, 3u)
@@ -41,11 +65,12 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	// The following function will create new Vertex Arrays, and pass their
 	// name in the given array (second argument). Since we only need one,
 	// pass a pointer to `data.vao`.
-	glGenVertexArrays(1, /*! \todo fill me */nullptr);
+	glGenVertexArrays(1, &data.vao);
+	assert( data.vao != 0u );
 
 	// To be able to store information, the Vertex Array has to be bound
 	// first.
-	glBindVertexArray(/*! \todo bind the previously generated Vertex Array */0u);
+	glBindVertexArray( /* bind the previously generated Vertex Array */data.vao );
 
 	// To store the data, we need to allocate buffers on the GPU. Let's
 	// allocate a first one for the vertices.
@@ -54,15 +79,16 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	// it will create multiple OpenGL objects, in this case buffers, and
 	// return their names in an array. Have the buffer's name stored into
 	// `data.bo`.
-	glGenBuffers(1, /*! \todo fill me */nullptr);
+	glGenBuffers(1, &data.bo );
 
 	// Similar to the Vertex Array, we need to bind it first before storing
 	// anything in it. The data stored in it can be interpreted in
 	// different ways. Here, we will say that it is just a simple 1D-array
 	// and therefore bind the buffer to the corresponding target.
-	glBindBuffer(GL_ARRAY_BUFFER, /*! \todo bind the previously generated Buffer */0u);
+	glBindBuffer(GL_ARRAY_BUFFER, /* bind the previously generated Buffer */ data.bo );
 
-	glBufferData(GL_ARRAY_BUFFER, /*! \todo how many bytes should the buffer contain? */0u,
+	auto const bo_size = static_cast<GLsizeiptr>(vertices.size());
+	glBufferData(GL_ARRAY_BUFFER, /* how many bytes should the buffer contain? */bo_size,
 	             /* where is the data stored on the CPU? */vertices.data(),
 	             /* inform OpenGL that the data is modified once, but used often */GL_STATIC_DRAW);
 
@@ -86,7 +112,7 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	// GL_ARRAY_BUFFER as its source for the data. How to interpret it is
 	// specified below:
 	glVertexAttribPointer(static_cast<unsigned int>(bonobo::shader_bindings::vertices),
-	                      /*! \todo how many components do our vertices have? */0,
+	                      /* how many components do our vertices have? */bo_size,
 	                      /* what is the type of each component? */GL_FLOAT,
 	                      /* should it automatically normalise the values stored */GL_FALSE,
 	                      /* once all components of a vertex have been read, how far away (in bytes) is the next vertex? */0,
@@ -95,17 +121,22 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	// Now, let's allocate a second one for the indices.
 	//
 	// Have the buffer's name stored into `data.ibo`.
-	glGenBuffers(1, /*! \todo fill me */nullptr);
+	glGenBuffers(1, &data.ibo);
+	assert( data.ibo != 0u );
 
 	// We still want a 1D-array, but this time it should be a 1D-array of
 	// elements, aka. indices!
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, /*! \todo bind the previously generated Buffer */0u);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, /* bind the previously generated Buffer */data.ibo);
 
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, /*! \todo how many bytes should the buffer contain? */0u,
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+				 /* how many bytes should the buffer contain? */static_cast<GLsizeiptr>(indices.size() * sizeof( glm::uvec3 )),
 	             /* where is the data stored on the CPU? */indices.data(),
 	             /* inform OpenGL that the data is modified once, but used often */GL_STATIC_DRAW);
 
-	data.indices_nb = /*! \todo how many indices do we have? */0u;
+	//
+	// Note RC : I'm not sure of this, just copied from createCircleRing function
+	//
+	data.indices_nb = /* how many indices do we have? */indices.size() * 3u;
 
 	// All the data has been recorded, we can unbind them.
 	glBindVertexArray(0u);
