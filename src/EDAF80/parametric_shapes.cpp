@@ -12,10 +12,13 @@
 bonobo::mesh_data
 parametric_shapes::createQuad(unsigned int width, unsigned int height)
 {
-	//
-	// Note RC : Not sure what is expected here... :/
-	//
-	//! \todo Fill in the blanks
+	/*
+		3---2
+		|   |
+		|   |
+		|   |
+		0---1
+	*/
 	auto const vertices = std::array<glm::vec3, 4>{
 		glm::vec3(0.0f,                      0.0f,                       0.0f),
 		glm::vec3(static_cast<float>(width), 0.0f,                       0.0f),
@@ -24,25 +27,13 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	};
 
 	/*
-		Note RC : How I understand the following indices :
-		  -->
-		2 --- 3
-		| \ /
-		|  X
-		| / \
-		0 --- 1
-		  -->
-		Should it be more like this?
-		  <--
-		2 --- 3
-		| \   |
-		|  \  |
-		|   \ |
-		0 --- 1
-		  -->
-		glm::uvec3(0u, 1u, 2u),
-		glm::uvec3(1u, 3u, 2u)
-
+		 <--
+		3---2
+		|  /|
+		| / |
+		|/  |
+		0---1
+		 -->
 	*/
 	auto const indices = std::array<glm::uvec3, 2>{
 		glm::uvec3(0u, 1u, 2u),
@@ -136,7 +127,7 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	//
 	// Note RC : I'm not sure of this, just copied from createCircleRing function
 	//
-	data.indices_nb = /* how many indices do we have? */indices.size() * 3u;
+	data.indices_nb = /* how many indices do we have? */indices.size();
 
 	// All the data has been recorded, we can unbind them.
 	glBindVertexArray(0u);
