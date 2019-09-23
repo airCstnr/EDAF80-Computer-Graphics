@@ -78,7 +78,7 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	// and therefore bind the buffer to the corresponding target.
 	glBindBuffer(GL_ARRAY_BUFFER, /* bind the previously generated Buffer */ data.bo );
 
-	auto const bo_size = static_cast<GLsizeiptr>(vertices.size());
+	auto const bo_size = static_cast<GLsizeiptr>(vertices.size() * sizeof( glm::vec3 ));
 	glBufferData(GL_ARRAY_BUFFER, /* how many bytes should the buffer contain? */bo_size,
 	             /* where is the data stored on the CPU? */vertices.data(),
 	             /* inform OpenGL that the data is modified once, but used often */GL_STATIC_DRAW);
@@ -103,7 +103,7 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	// GL_ARRAY_BUFFER as its source for the data. How to interpret it is
 	// specified below:
 	glVertexAttribPointer(static_cast<unsigned int>(bonobo::shader_bindings::vertices),
-	                      /* how many components do our vertices have? */bo_size,
+	                      /* how many components do our vertices have? */3,
 	                      /* what is the type of each component? */GL_FLOAT,
 	                      /* should it automatically normalise the values stored */GL_FALSE,
 	                      /* once all components of a vertex have been read, how far away (in bytes) is the next vertex? */0,
@@ -127,7 +127,7 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	//
 	// Note RC : I'm not sure of this, just copied from createCircleRing function
 	//
-	data.indices_nb = /* how many indices do we have? */indices.size();
+	data.indices_nb = /* how many indices do we have? */indices.size() * 3u;
 
 	// All the data has been recorded, we can unbind them.
 	glBindVertexArray(0u);
