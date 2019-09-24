@@ -35,10 +35,12 @@ edaf80::Assignment2::Assignment2(WindowManager& windowManager) :
 void
 edaf80::Assignment2::run()
 {
-	// Load the sphere geometry
+	//Load the sphere geometry
 	auto const shape = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
 	if (shape.vao == 0u)
 		return;
+
+	auto const quad_shape = parametric_shapes::createQuad(2u, 1u);
 
 	// Set up the camera
 	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
@@ -114,11 +116,17 @@ edaf80::Assignment2::run()
 	// always be changed at runtime through the "Scene Controls" window.
 	bool interpolate = true;
 
+	// Ring 
 	auto circle_rings = Node();
 	circle_rings.set_geometry(shape);
 	circle_rings.set_program(&fallback_shader, set_uniforms);
 	TRSTransformf& circle_rings_transform_ref = circle_rings.get_transform();
 
+	// Quad 
+	auto quad = Node();
+	quad.set_geometry(quad_shape);
+	quad.set_program(&fallback_shader, set_uniforms);
+	TRSTransformf& quad_transform_ref = quad.get_transform();
 
 	//! \todo Create a tesselated sphere and a tesselated torus
 
@@ -166,7 +174,7 @@ edaf80::Assignment2::run()
 
 
 		circle_rings_transform_ref.RotateY(0.01f);
-
+		quad_transform_ref.RotateY(0.01f);
 
 		if (interpolate) {
 			//! \todo Interpolate the movement of a shape between various
@@ -192,14 +200,15 @@ edaf80::Assignment2::run()
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		bonobo::changePolygonMode(polygon_mode);
 
-		circle_rings.render(mCamera.GetWorldToClipMatrix());
+		//circle_rings.render(mCamera.GetWorldToClipMatrix());
+		quad.render(mCamera.GetWorldToClipMatrix());
 
 		bool const opened = ImGui::Begin("Scene Controls", nullptr, ImVec2(300, 100), -1.0f, 0);
 		if (opened) {
 			bonobo::uiSelectPolygonMode("Polygon mode", polygon_mode);
 			auto selection_result = program_manager.SelectProgram("Shader", program_index);
 			if (selection_result.was_selection_changed) {
-				circle_rings.set_program(selection_result.program, set_uniforms);
+				quad.set_program(selection_result.program, set_uniforms);
 			}
 			ImGui::Separator();
 			ImGui::Checkbox("Enable interpolation", &interpolate);
