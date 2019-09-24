@@ -40,7 +40,8 @@ edaf80::Assignment2::run()
 	if (shape.vao == 0u)
 		return;
 
-	auto const quad_shape = parametric_shapes::createQuad(2u, 1u);
+	//auto const quad_shape = parametric_shapes::createQuad(2u, 1u);
+	auto const quad_shape = parametric_shapes::createSphere(24, 20, 1);
 
 	// Set up the camera
 	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
