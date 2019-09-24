@@ -107,8 +107,8 @@ int main()
 	//Set up the Sun node and other related attributes
 	GLuint const sun_texture = bonobo::loadTexture2D("sunmap.png");						//load the texture
 	CelestialBody sun_node(sphere, &celestial_body_shader, sun_texture);				//create the celestialBody node 
-	sun_node.set_scale(glm::vec3(0.5, 0.5, 0.5));										//scaling
-	sun_node.set_spinning(glm::radians(10.0), glm::pi<float>(), glm::radians(45.0));	//spinning
+	sun_node.set_scale(glm::vec3(1.0, 1.0, 1.0));										//scaling
+	sun_node.set_spinning(0.0, (2*glm::pi<float>())/6, glm::radians(45.0));				//spinning
 	sun_node.set_orbit(0.0f, glm::radians(10.0f), 0.0f, 0.0f);							// orbiting
 
 	//Node solar_system_node;
@@ -121,9 +121,9 @@ int main()
 	// Set up the Mercury node and other related attributes
 	GLuint const mercury_texture = bonobo::loadTexture2D("mercurymap.jpg");							// load the texture
 	CelestialBody mercury_node(sphere, &celestial_body_shader, mercury_texture);					// create the earth node 
-	mercury_node.set_scale(glm::vec3(0.02, 0.02, 0.02));											// set scaling
-	mercury_node.set_spinning(glm::radians(2.0), 2*glm::pi<float>()/180, glm::radians(45.0));		// set spinning
-	mercury_node.set_orbit(glm::radians(3.4), 2*glm::pi<float>()/4, 2);								// set orbiting
+	mercury_node.set_scale(glm::vec3(0.2));															// set scaling
+	mercury_node.set_spinning(glm::radians(2.0f), (2*glm::pi<float>())/180, glm::radians(45.0));	// set spinning
+	mercury_node.set_orbit(glm::radians(3.4f), (2*glm::pi<float>())/4, 2);							// set orbiting
 
 	// Set up the Venus node and other related attributes
 	GLuint const venus_texture = bonobo::loadTexture2D("venusmap.jpg");								// load the texture
@@ -132,13 +132,12 @@ int main()
 	venus_node.set_spinning(glm::radians(177.0), 2 * glm::pi<float>() / 600, glm::radians(45.0));	// set spinning
 	venus_node.set_orbit(glm::radians(3.9), 2 * glm::pi<float>() / 12, 3);							// set orbiting
 
-
 	// Set up the Earth node and other related attributes
 	GLuint const earth_texture = bonobo::loadTexture2D( "earth_diffuse.png" );						// load the texture
 	CelestialBody earth_node( sphere, &celestial_body_shader, earth_texture );						// create the earth node 
-	earth_node.set_scale( glm::vec3( 0.25, 0.25, 0.25 ) );											// set scaling
-	earth_node.set_spinning( glm::radians( 10.0 ), glm::pi<float>(), glm::radians( 45.0 ) );		// set spinning
-	earth_node.set_orbit( 0.0f, glm::radians( 180.0f ), 4 );										// set orbiting
+	earth_node.set_scale( glm::vec3( 0.5 ));														// set scaling
+	earth_node.set_spinning(glm::radians(23.0f), (2* glm::pi<float>())/3, glm::radians( 45.0 ) );	// set spinning
+	earth_node.set_orbit(glm::radians(7.2f), (2 * glm::pi<float>())/ 20, 4 );						// set orbiting
 
 	// Set up the Moon node and other related attributes
 	GLuint const moon_texture = bonobo::loadTexture2D( "noise.png" );								// load the texture
