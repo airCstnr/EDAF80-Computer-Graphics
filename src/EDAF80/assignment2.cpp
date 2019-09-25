@@ -37,8 +37,8 @@ edaf80::Assignment2::run()
 {
 	//Load the geometry
 	//auto const shape = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
-	auto const shape = parametric_shapes::createQuad(1u, 1u);
-	//auto const shape = parametric_shapes::createSphere(24, 20, 1);
+	//auto const shape = parametric_shapes::createQuad(1u, 1u);
+	auto const shape = parametric_shapes::createSphere(24, 20, 1);
 	if (shape.vao == 0u)
 		return;
 
@@ -141,6 +141,10 @@ edaf80::Assignment2::run()
 	bool show_logs = true;
 	bool show_gui = true;
 
+	// Create random path
+
+
+
 	while (!glfwWindowShouldClose(window)) {
 		nowTime = GetTimeSeconds();
 		ddeltatime = nowTime - lastTime;
@@ -166,9 +170,12 @@ edaf80::Assignment2::run()
 
 		geometry_transform_ref.RotateY(0.01f);
 
+		// set transform following a path
+
 		if (interpolate) {
 			//! \todo Interpolate the movement of a shape between various control points
-
+			// increment the loop position along the path
+			// Be careful to set it circular
 			if (use_linear) {
 
 				//! \todo Compute the interpolated position
@@ -224,7 +231,23 @@ int main()
 	float const tao = 0.5; //tense factor
 	glm::mat4 mat4(glm::vec4(0, -tao, 2*tao, -tao), glm::vec4(1, 0, tao-3, 2-tao), glm::vec4(0, tao, 3 - 2 * tao, tao-2), glm::vec4(0, 0, -tao, tao));
 	glm::mat3x4 mat3x4(glm::vec4(0,0,0,0), glm::vec4(1, 1, 1, 1), glm::vec4(2, 2, 2, 2));
-	std::cout << mat3x4;
+
+	std::cout << mat4 << std::endl;
+	std::cout << mat3x4 << std::endl;
+
+	glm::vec3 p0(0, 0, 0),
+		p1(0, 1, 2),
+		p2(1, 1, 2),
+		p3(1, 1, 0);
+	//float x(0);
+	std::cout << interpolation::evalLERP(p0, p1, 0) << std::endl;
+	std::cout << interpolation::evalLERP(p0, p1, 0.5) << std::endl;
+	std::cout << interpolation::evalLERP(p0, p1, 0.75) << std::endl;
+	std::cout << interpolation::evalLERP(p0, p1, 1) << std::endl;
+
+	for (float x = 0; x <= 1; x += 0.1) {
+		std::cout << interpolation::evalCatmullRom(p0, p1, p2, p3, tao, x) << std::endl;
+	}
 
 	try {
 		edaf80::Assignment2 assignment2(framework.GetWindowManager());
@@ -232,4 +255,5 @@ int main()
 	} catch (std::runtime_error const& e) {
 		LogError(e.what());
 	}
+
 }

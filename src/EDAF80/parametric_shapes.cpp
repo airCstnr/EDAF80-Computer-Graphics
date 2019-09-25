@@ -166,9 +166,9 @@ parametric_shapes::createSphere(unsigned int const res_theta,
 			// TODO in Assignment 3
 
 			// tangent
-			auto t = glm::vec3(	radius * cos_theta * sin_phi,
+			auto t = glm::vec3(	radius * cos_theta,
 								0,
-								-radius * sin_theta * sin_phi);
+								-radius * sin_theta);
 			t = glm::normalize(t);
 			tangents[index] = t;
 
