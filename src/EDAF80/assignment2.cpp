@@ -142,8 +142,14 @@ edaf80::Assignment2::run()
 	bool show_gui = true;
 
 	// Create random path
+	size_t path_length( 10 ); // number of points in the path
+	float y_rand; // random y value for the path generation
+	std::vector<glm::vec3>interpolation_path; // path vector
 
-
+	for(size_t i=0; i < path_length; i++) {
+		y_rand = ((float( rand() ) / float( RAND_MAX )) * 2) -1; // generate random number between -1 and 1
+		interpolation_path.push_back( glm::vec3( static_cast<float>(i), y_rand, 0 ) );
+	}
 
 	while (!glfwWindowShouldClose(window)) {
 		nowTime = GetTimeSeconds();
