@@ -142,7 +142,7 @@ edaf80::Assignment2::run()
 	bool show_gui = true;
 
 	// Create random path
-	size_t path_length( 10 ); // number of points in the path
+	size_t path_length( 5 ); // number of points in the path
 	float y_rand; // random y value for the path generation
 	std::vector<glm::vec3>interpolation_path; // path vector
 
@@ -150,6 +150,12 @@ edaf80::Assignment2::run()
 		y_rand = ((float( rand() ) / float( RAND_MAX )) * 2) -1; // generate random number between -1 and 1
 		interpolation_path.push_back( glm::vec3( static_cast<float>(i), y_rand, 0 ) );
 	}
+
+	float path_pos = 0.0f;
+	float pos_velocity = 0.1f;
+	int current_point_index = 0;
+	int next_point_index = 0;
+	float distance_ratio = 0;
 
 	while (!glfwWindowShouldClose(window)) {
 		nowTime = GetTimeSeconds();
@@ -176,16 +182,34 @@ edaf80::Assignment2::run()
 
 		geometry_transform_ref.RotateY(0.01f);
 
-		// set transform following a path
-
 		if (interpolate) {
-			//! \todo Interpolate the movement of a shape between various control points
-			// increment the loop position along the path
-			// Be careful to set it circular
-			if (use_linear) {
+			// Interpolate the movement of a shape between various control points
 
-				//! \todo Compute the interpolated position
-				//!       using the linear interpolation.
+			if (use_linear) {
+				current_point_index = floor(path_pos);
+				next_point_index = current_point_index + 1;
+				distance_ratio = path_pos - current_point_index;
+
+				// manage path circularity
+				if (current_point_index == interpolation_path.size() - 1)
+				{
+					next_point_index = 0;
+				}
+				if (current_point_index == interpolation_path.size())
+				{
+					current_point_index = 0;
+					next_point_index = 1;
+					path_pos = 0;
+				}
+
+				// compute linear translation 
+				glm::vec3 p_step = interpolation::evalLERP(	interpolation_path[current_point_index],
+															interpolation_path[next_point_index],
+															distance_ratio);
+
+				// set translation interpolatewd along the path
+				geometry_transform_ref.SetTranslate(p_step);				
+
 			}
 			else {
 				//! \todo Compute the interpolated position
@@ -193,6 +217,8 @@ edaf80::Assignment2::run()
 				//!       use the `catmull_rom_tension`
 				//!       variable as your tension argument.
 			}
+
+			path_pos += pos_velocity;
 		}
 
 		int framebuffer_width, framebuffer_height;
