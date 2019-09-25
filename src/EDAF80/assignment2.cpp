@@ -152,9 +152,11 @@ edaf80::Assignment2::run()
 	}
 
 	float path_pos = 0.0f;
-	float pos_velocity = 0.1f;
+	float pos_velocity = 0.05f;
 	int current_point_index = 0;
 	int next_point_index = 0;
+	int next2_point_index = 0;
+	int previous_point_index = 0;
 	float distance_ratio = 0;
 
 	while (!glfwWindowShouldClose(window)) {
@@ -212,10 +214,50 @@ edaf80::Assignment2::run()
 
 			}
 			else {
-				//! \todo Compute the interpolated position
+				//!		 Compute the interpolated position
 				//!       using the Catmull-Rom interpolation;
 				//!       use the `catmull_rom_tension`
 				//!       variable as your tension argument.
+
+				current_point_index = floor(path_pos);
+				next_point_index = current_point_index + 1;
+				next2_point_index = current_point_index + 2;
+				previous_point_index = current_point_index - 1;
+				distance_ratio = path_pos - current_point_index;
+
+				// manage path circularity
+				if (current_point_index == interpolation_path.size() - 2)
+				{
+					next2_point_index = 0;
+				}
+				if (current_point_index == interpolation_path.size() - 1)
+				{
+					next_point_index = 0;
+					next2_point_index = 1;
+				}
+				if (current_point_index == interpolation_path.size())
+				{
+					current_point_index = 0;
+					next_point_index = 1;
+					next2_point_index = 2;
+					path_pos = 0;
+				}
+				if (current_point_index == 0)
+				{
+					previous_point_index = interpolation_path.size() - 1;
+				}
+
+				// compute linear translation 
+				glm::vec3 q_step = interpolation::evalCatmullRom(	interpolation_path[previous_point_index],
+																	interpolation_path[current_point_index],
+																	interpolation_path[next_point_index],
+																	interpolation_path[next2_point_index],
+																	catmull_rom_tension,
+																	distance_ratio);
+
+				// set translation interpolatewd along the path
+				geometry_transform_ref.SetTranslate(q_step);
+
 			}
 
 			path_pos += pos_velocity;
@@ -259,27 +301,6 @@ edaf80::Assignment2::run()
 int main()
 {
 	Bonobo framework;
-
-	float const tao = 0.5; //tense factor
-	glm::mat4 mat4(glm::vec4(0, -tao, 2*tao, -tao), glm::vec4(1, 0, tao-3, 2-tao), glm::vec4(0, tao, 3 - 2 * tao, tao-2), glm::vec4(0, 0, -tao, tao));
-	glm::mat3x4 mat3x4(glm::vec4(0,0,0,0), glm::vec4(1, 1, 1, 1), glm::vec4(2, 2, 2, 2));
-
-	std::cout << mat4 << std::endl;
-	std::cout << mat3x4 << std::endl;
-
-	glm::vec3 p0(0, 0, 0),
-		p1(0, 1, 2),
-		p2(1, 1, 2),
-		p3(1, 1, 0);
-	//float x(0);
-	std::cout << interpolation::evalLERP(p0, p1, 0) << std::endl;
-	std::cout << interpolation::evalLERP(p0, p1, 0.5) << std::endl;
-	std::cout << interpolation::evalLERP(p0, p1, 0.75) << std::endl;
-	std::cout << interpolation::evalLERP(p0, p1, 1) << std::endl;
-
-	for (float x = 0; x <= 1; x += 0.1) {
-		std::cout << interpolation::evalCatmullRom(p0, p1, p2, p3, tao, x) << std::endl;
-	}
 
 	try {
 		edaf80::Assignment2 assignment2(framework.GetWindowManager());
