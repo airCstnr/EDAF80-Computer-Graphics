@@ -109,9 +109,7 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	// elements, aka. indices!
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
 
-	auto const indices_offset = 0u;
 	auto const indices_size = static_cast<GLsizeiptr>(indices.size() * sizeof(glm::vec3));
-
 	auto const ibo_size = static_cast<GLsizeiptr>(indices_size);
 
 	glBufferData(																	GL_ELEMENT_ARRAY_BUFFER,
@@ -154,7 +152,7 @@ parametric_shapes::createSphere(unsigned int const res_theta,
 		float cos_theta = std::cos(theta),
 			sin_theta = std::sin(theta);
 
-		phi = 0;
+		phi = 0; //reset when all values are evaluated for a specific theta
 
 		for (unsigned int j = 0u; j < res_phi; ++j) {
 			float sin_phi = std::sin(phi);
@@ -207,8 +205,8 @@ parametric_shapes::createSphere(unsigned int const res_theta,
 			++index;
 
 			indices[index] = glm::uvec3(res_phi * i + j,
-				res_phi * i + j + res_phi + 1u,
-				res_phi * i + j + res_phi);
+										res_phi * i + j + res_phi + 1u,
+										res_phi * i + j + res_phi);
 			++index;
 		}
 	}

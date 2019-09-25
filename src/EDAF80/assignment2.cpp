@@ -35,13 +35,12 @@ edaf80::Assignment2::Assignment2(WindowManager& windowManager) :
 void
 edaf80::Assignment2::run()
 {
-	//Load the sphere geometry
-	auto const shape = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
+	//Load the geometry
+	//auto const shape = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
+	auto const shape = parametric_shapes::createQuad(1u, 1u);
+	//auto const shape = parametric_shapes::createSphere(24, 20, 1);
 	if (shape.vao == 0u)
 		return;
-
-	//auto const quad_shape = parametric_shapes::createQuad(2u, 1u);
-	auto const quad_shape = parametric_shapes::createSphere(24, 20, 1);
 
 	// Set up the camera
 	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
@@ -117,20 +116,13 @@ edaf80::Assignment2::run()
 	// always be changed at runtime through the "Scene Controls" window.
 	bool interpolate = true;
 
-	// Ring 
-	auto circle_rings = Node();
-	circle_rings.set_geometry(shape);
-	circle_rings.set_program(&fallback_shader, set_uniforms);
-	TRSTransformf& circle_rings_transform_ref = circle_rings.get_transform();
+	// Set up node for the selected geometry
+	auto geometry_node = Node();
+	geometry_node.set_geometry(shape);
+	geometry_node.set_program(&fallback_shader, set_uniforms);
+	TRSTransformf& geometry_transform_ref = geometry_node.get_transform();
 
-	// Quad 
-	auto quad = Node();
-	quad.set_geometry(quad_shape);
-	quad.set_program(&fallback_shader, set_uniforms);
-	TRSTransformf& quad_transform_ref = quad.get_transform();
-
-	//! \todo Create a tesselated sphere and a tesselated torus
-
+	//! \todo Create a tesselated torus
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -138,7 +130,6 @@ edaf80::Assignment2::run()
 	//glEnable(GL_CULL_FACE);
 	//glCullFace(GL_FRONT);
 	//glCullFace(GL_BACK);
-
 
 	f64 ddeltatime;
 	size_t fpsSamples = 0;
@@ -173,14 +164,13 @@ edaf80::Assignment2::run()
 
 		ImGui_ImplGlfwGL3_NewFrame();
 
-
-		circle_rings_transform_ref.RotateY(0.01f);
-		quad_transform_ref.RotateY(0.01f);
+		geometry_transform_ref.RotateY(0.01f);
 
 		if (interpolate) {
-			//! \todo Interpolate the movement of a shape between various
-			//!        control points.
+			//! \todo Interpolate the movement of a shape between various control points
+
 			if (use_linear) {
+
 				//! \todo Compute the interpolated position
 				//!       using the linear interpolation.
 			}
@@ -192,7 +182,6 @@ edaf80::Assignment2::run()
 			}
 		}
 
-
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
 		glViewport(0, 0, framebuffer_width, framebuffer_height);
@@ -201,15 +190,14 @@ edaf80::Assignment2::run()
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		bonobo::changePolygonMode(polygon_mode);
 
-		//circle_rings.render(mCamera.GetWorldToClipMatrix());
-		quad.render(mCamera.GetWorldToClipMatrix());
+		geometry_node.render(mCamera.GetWorldToClipMatrix());
 
 		bool const opened = ImGui::Begin("Scene Controls", nullptr, ImVec2(300, 100), -1.0f, 0);
 		if (opened) {
 			bonobo::uiSelectPolygonMode("Polygon mode", polygon_mode);
 			auto selection_result = program_manager.SelectProgram("Shader", program_index);
 			if (selection_result.was_selection_changed) {
-				quad.set_program(selection_result.program, set_uniforms);
+				geometry_node.set_program(selection_result.program, set_uniforms);
 			}
 			ImGui::Separator();
 			ImGui::Checkbox("Enable interpolation", &interpolate);
@@ -232,6 +220,11 @@ edaf80::Assignment2::run()
 int main()
 {
 	Bonobo framework;
+
+	float const tao = 0.5; //tense factor
+	glm::mat4 mat4(glm::vec4(0, -tao, 2*tao, -tao), glm::vec4(1, 0, tao-3, 2-tao), glm::vec4(0, tao, 3 - 2 * tao, tao-2), glm::vec4(0, 0, -tao, tao));
+	glm::mat3x4 mat3x4(glm::vec4(0,0,0,0), glm::vec4(1, 1, 1, 1), glm::vec4(2, 2, 2, 2));
+	std::cout << mat3x4;
 
 	try {
 		edaf80::Assignment2 assignment2(framework.GetWindowManager());
