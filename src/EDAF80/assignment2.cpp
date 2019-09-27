@@ -157,22 +157,24 @@ edaf80::Assignment2::run()
 	bool show_gui = true;
 
 	// Create random path
-	size_t path_length( 5 ); // number of points in the path
-	float y_rand; // random y value for the path generation
-	std::vector<glm::vec3>interpolation_path; // path vector
+	size_t path_length( 5 );					// number of points in the path
+	float y_rand;								// random y value for the path generation
+	std::vector<glm::vec3>interpolation_path;	// path vector
 
 	for(size_t i=0; i < path_length; i++) {
-		y_rand = ((float( rand() ) / float( RAND_MAX )) * 2) -1; // generate random number between -1 and 1
+		// generate random number between -1 and 1
+		y_rand = ((float( rand() ) / float( RAND_MAX )) * 2) -1;
+
+		// create new point with x incremented, y in [-1, 1] and z = 0
 		interpolation_path.push_back( glm::vec3( static_cast<float>(i), y_rand, 0 ) );
 	}
 
-	float path_pos = 0.0f;
-	float pos_velocity = 0.05f;
-	int current_point_index = 0;
-	int next_point_index = 0;
-	int next2_point_index = 0;
-	int previous_point_index = 0;
-	float distance_ratio = 0;
+	float path_pos = 0.0f;			// current position of shape on path
+	int current_point_index = 0;	// current path point index (last known non interpolated point) (n)
+	int next_point_index = 0;		// next path point index (n+1)
+	int next2_point_index = 0;		// next path point index (n+2)
+	int previous_point_index = 0;	// previous path point index (n-1)
+	float distance_ratio = 0;		// distance between current position and current path point
 
 	while (!glfwWindowShouldClose(window)) {
 		nowTime = GetTimeSeconds();
