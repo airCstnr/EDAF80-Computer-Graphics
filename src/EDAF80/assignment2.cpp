@@ -118,6 +118,10 @@ edaf80::Assignment2::run()
 	// always be changed at runtime through the "Scene Controls" window.
 	bool interpolate = false;
 
+	// Set whether to interpolate the position of an object or not; it can
+	// always be changed at runtime through the "Scene Controls" window.
+	float interpolation_speed = 0.05f;
+
 	// Set the default rotation behaviour;
 	// it can always be changed at runtime through the "Scene Controls" window.
 	bool rotate = false;
@@ -273,7 +277,7 @@ edaf80::Assignment2::run()
 
 			}
 
-			path_pos += pos_velocity;
+			path_pos += interpolation_speed;
 		}
 
 		int framebuffer_width, framebuffer_height;
@@ -301,6 +305,7 @@ edaf80::Assignment2::run()
 
 			ImGui::Separator();
 			ImGui::Checkbox("Enable interpolation", &interpolate);
+			ImGui::SliderFloat("Interpolation speed", &interpolation_speed, 0.0f, 1.0f );
 			ImGui::Checkbox("Use linear interpolation", &use_linear);
 			ImGui::SliderFloat("Catmull-Rom tension", &catmull_rom_tension, 0.0f, 1.0f);
 		}
