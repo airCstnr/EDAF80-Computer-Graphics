@@ -111,28 +111,6 @@ int main()
 	sun_node.set_spinning(0.0, (2*glm::pi<float>())/6, glm::radians(45.0));				//spinning
 	sun_node.set_orbit(0.0f, glm::radians(10.0f), 0.0f, 0.0f);							// orbiting
 
-
-	/*
-	Load textures from res/textures folder.
-		Diffuse texture : http://planetpixelemporium.com/download/download.php?saturnringcolor.jpg
-		Opacity texture : http://planetpixelemporium.com/download/download.php?saturnringpattern.gif
-		The diffuse texture uses the name "diffuse_texture" and is of type GL_TEXTURE_2D
-		the opacity texture uses the name "opacity_texture" but is also of type GL_TEXTURE_2D
-	*/
-	GLuint const rings_diffuse_texture = bonobo::loadTexture2D( "saturnringcolor.jpg" ); //load the texture
-	GLuint const rings_opacity_texture = bonobo::loadTexture2D( "saturnringpattern.gif" ); //load the texture
-	// TODO : move sun rings to satrun node :)
-
-	// Add rings to sun
-	//sun_node.add_rings( rings_shape,
-	//				{ 0, 0 },
-	//					&celestial_ring_shader,
-	//					rings_diffuse_texture,
-	//					rings_opacity_texture);
-
-	//---------------------------------------------------------------------------------------------------------------------------------------------
-
-	Node solar_system_node;
 	//Node solar_system_node;
 	//solar_system_node.add_child(&sun_node);
 

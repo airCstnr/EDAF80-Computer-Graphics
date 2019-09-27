@@ -12,7 +12,13 @@
 bonobo::mesh_data
 parametric_shapes::createQuad(unsigned int width, unsigned int height)
 {
-	//! \todo Fill in the blanks
+	/*
+		3---2
+		|   |
+		|   |
+		|   |
+		0---1
+	*/
 	auto const vertices = std::array<glm::vec3, 4>{
 		glm::vec3(0.0f,                      0.0f,                       0.0f),
 		glm::vec3(static_cast<float>(width), 0.0f,                       0.0f),
@@ -20,6 +26,15 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 		glm::vec3(0.0f,                      static_cast<float>(height), 0.0f)
 	};
 
+	/*
+		 <--
+		3---2
+		|  /|
+		| / |
+		|/  |
+		0---1
+		 -->
+	*/
 	auto const indices = std::array<glm::uvec3, 2>{
 		glm::uvec3(0u, 1u, 2u),
 		glm::uvec3(0u, 2u, 3u)
@@ -42,11 +57,11 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	// name in the given array (second argument). Since we only need one,
 	// pass a pointer to `data.vao`.
 	glGenVertexArrays(1, &data.vao);
-	assert(data.vao != 0u);
+	assert( data.vao != 0u );
 
 	// To be able to store information, the Vertex Array has to be bound
 	// first.
-	glBindVertexArray(data.vao);
+	glBindVertexArray( /* bind the previously generated Vertex Array */data.vao );
 
 	// To store the data, we need to allocate buffers on the GPU. Let's
 	// allocate a first one for the vertices.
@@ -61,17 +76,12 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	// anything in it. The data stored in it can be interpreted in
 	// different ways. Here, we will say that it is just a simple 1D-array
 	// and therefore bind the buffer to the corresponding target.
-	glBindBuffer(GL_ARRAY_BUFFER, data.bo);
+	glBindBuffer(GL_ARRAY_BUFFER, /* bind the previously generated Buffer */ data.bo );
 
-	auto const vertices_offset = 0u;
-	auto const vertices_size = static_cast<GLsizeiptr>(vertices.size() * sizeof(glm::vec3)); 
-
-	auto const bo_size = static_cast<GLsizeiptr>(vertices_size);
-
-	glBufferData(																	GL_ARRAY_BUFFER,
-				/* how many bytes should the buffer contain*/						bo_size,
-	            /* where is the data stored on the CPU? */							vertices.data(),
-	            /* inform OpenGL that the data is modified once, but used often */	GL_STATIC_DRAW);
+	auto const bo_size = static_cast<GLsizeiptr>(vertices.size() * sizeof( glm::vec3 ));
+	glBufferData(GL_ARRAY_BUFFER, /* how many bytes should the buffer contain? */bo_size,
+	             /* where is the data stored on the CPU? */vertices.data(),
+	             /* inform OpenGL that the data is modified once, but used often */GL_STATIC_DRAW);
 
 	// Vertices have been just stored into a buffer, but we still need to
 	// tell Vertex Array where to find them, and how to interpret the data
@@ -111,13 +121,17 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 
 	auto const indices_size = static_cast<GLsizeiptr>(indices.size() * sizeof(glm::vec3));
 	auto const ibo_size = static_cast<GLsizeiptr>(indices_size);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, /* bind the previously generated Buffer */data.ibo);
 
 	glBufferData(																	GL_ELEMENT_ARRAY_BUFFER,
 				/* how many bytes should the buffer contain? */						ibo_size,
 	            /* where is the data stored on the CPU? */							indices.data(),
 	            /* inform OpenGL that the data is modified once, but used often */	GL_STATIC_DRAW);
 
-	data.indices_nb = indices.size() * 3;
+	//
+	// Note RC : I'm not sure of this, just copied from createCircleRing function
+	//
+	data.indices_nb = /* how many indices do we have? */indices.size() * 3u;
 
 	// All the data has been recorded, we can unbind them.
 	glBindVertexArray(0u);
