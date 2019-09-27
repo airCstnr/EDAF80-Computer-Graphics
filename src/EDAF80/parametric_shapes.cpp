@@ -142,6 +142,81 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 }
 
 bonobo::mesh_data
+parametric_shapes::createDice( float const width )
+{
+	auto const vertices_nb = 8;
+	auto const indices_nb = 12;
+
+	/*
+		Dice look like this:
+		   3-------2
+		  /|      /|
+		 / |     / |
+		0--|----1  |
+		|  7----|--6
+		| /     | /
+		4-------5
+	*/
+	auto vertices = std::array<glm::vec3, vertices_nb>{
+		glm::vec3( 0.0f,	0.0f,	0.0f ),
+		glm::vec3( width,	0.0f,	0.0f ),
+		glm::vec3( width,	0.0f,	-width ),
+		glm::vec3( 0.0f,	0.0f,	-width ),
+		glm::vec3( 0.0f,	-width,	0.0f ),
+		glm::vec3( width,	-width,	0.0f ),
+		glm::vec3( width,	-width,	-width ),
+		glm::vec3( 0.0f,	-width,	-width )
+	};
+
+	// create index array
+	auto const indices = std::array<glm::uvec3, indices_nb>{
+		glm::uvec3( 0u, 1u, 3u ),
+		glm::uvec3( 1u, 2u, 3u ),
+		glm::uvec3( 0u, 4u, 1u ),
+		glm::uvec3( 1u, 4u, 5u ),
+		glm::uvec3( 1u, 5u, 6u ),
+		glm::uvec3( 1u, 6u, 2u ),
+		glm::uvec3( 2u, 6u, 7u ),
+		glm::uvec3( 2u, 7u, 3u ),
+		glm::uvec3( 0u, 3u, 4u ),
+		glm::uvec3( 3u, 7u, 4u ),
+		glm::uvec3( 4u, 6u, 5u ),
+		glm::uvec3( 4u, 7u, 6u ),
+	};
+
+	bonobo::mesh_data data;
+	glGenVertexArrays( 1, &data.vao );
+	assert( data.vao != 0u );
+	glBindVertexArray( data.vao );
+
+	auto const vertices_offset = 0u;
+	auto const vertices_size = static_cast<GLsizeiptr>(vertices.size() * sizeof( glm::vec3 ));
+	auto const bo_size = static_cast<GLsizeiptr>(vertices_size);
+
+	glGenBuffers( 1, &data.bo );
+	assert( data.bo != 0u );
+	glBindBuffer( GL_ARRAY_BUFFER, data.bo );
+	glBufferData( GL_ARRAY_BUFFER, bo_size, nullptr, GL_STATIC_DRAW );
+
+	glBufferSubData( GL_ARRAY_BUFFER, vertices_offset, vertices_size, static_cast<GLvoid const*>(vertices.data()) );
+	glEnableVertexAttribArray( static_cast<unsigned int>(bonobo::shader_bindings::vertices) );
+	glVertexAttribPointer( static_cast<unsigned int>(bonobo::shader_bindings::vertices), 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid const*>(0x0) );
+
+	glBindBuffer( GL_ARRAY_BUFFER, 0u );
+
+	data.indices_nb = indices.size() * 3u;
+	glGenBuffers( 1, &data.ibo );
+	assert( data.ibo != 0u );
+	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, data.ibo );
+	glBufferData( GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(indices.size() * sizeof( glm::uvec3 )), reinterpret_cast<GLvoid const*>(indices.data()), GL_STATIC_DRAW );
+
+	glBindVertexArray( 0u );
+	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0u );
+
+	return data;
+}
+
+bonobo::mesh_data
 parametric_shapes::createSphere(unsigned int const res_theta,
                                 unsigned int const res_phi, float const radius)
 {
