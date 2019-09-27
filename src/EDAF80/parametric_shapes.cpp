@@ -26,6 +26,27 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 		glm::vec3(0.0f,                      static_cast<float>(height), 0.0f)
 	};
 
+	auto const tangents = std::array<glm::vec3, 4>{
+		glm::vec3( static_cast<float>(width), 0.0f, 0.0f ),
+		glm::vec3( static_cast<float>(width), 0.0f, 0.0f ),
+		glm::vec3( static_cast<float>(width), 0.0f, 0.0f ),
+		glm::vec3( static_cast<float>(width), 0.0f, 0.0f )
+	};
+
+	auto const binormals = std::array<glm::vec3, 4>{
+		glm::vec3( 0.0f, static_cast<float>(width), 0.0f ),
+		glm::vec3( 0.0f, static_cast<float>(width), 0.0f ),
+		glm::vec3( 0.0f, static_cast<float>(width), 0.0f ),
+		glm::vec3( 0.0f, static_cast<float>(width), 0.0f )
+	};
+
+	auto const normals = std::array<glm::vec3, 4>{
+		glm::vec3( 0.0f, 0.0f, static_cast<float>(width) ),
+		glm::vec3( 0.0f, 0.0f, static_cast<float>(width) ),
+		glm::vec3( 0.0f, 0.0f, static_cast<float>(width) ),
+		glm::vec3( 0.0f, 0.0f, static_cast<float>(width) )
+	};
+
 	/*
 		 <--
 		3---2
@@ -63,6 +84,23 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	// first.
 	glBindVertexArray( /* bind the previously generated Vertex Array */data.vao );
 
+	// Compute sises and offsets
+	auto const vertices_offset = 0u;
+	auto const vertices_size = static_cast<GLsizeiptr>(vertices.size() * sizeof( glm::vec3 ));
+	auto const tangents_offset = vertices_size;
+	auto const tangents_size = static_cast<GLsizeiptr>(tangents.size() * sizeof( glm::vec3 ));
+	auto const binormals_offset = tangents_offset + tangents_size;
+	auto const binormals_size = static_cast<GLsizeiptr>(binormals.size() * sizeof( glm::vec3 ));
+	auto const normals_offset = binormals_offset + binormals_size;
+	auto const normals_size = static_cast<GLsizeiptr>(normals.size() * sizeof( glm::vec3 ));
+
+	// Compute Buffer Object size
+	auto const bo_size = static_cast<GLsizeiptr>(vertices_size
+												+ tangents_size
+												+ binormals_size
+												+ normals_size
+												);
+
 	// To store the data, we need to allocate buffers on the GPU. Let's
 	// allocate a first one for the vertices.
 	//
@@ -78,10 +116,14 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	// and therefore bind the buffer to the corresponding target.
 	glBindBuffer(GL_ARRAY_BUFFER, /* bind the previously generated Buffer */ data.bo );
 
-	auto const bo_size = static_cast<GLsizeiptr>(vertices.size() * sizeof( glm::vec3 ));
-	glBufferData(GL_ARRAY_BUFFER, /* how many bytes should the buffer contain? */bo_size,
-	             /* where is the data stored on the CPU? */vertices.data(),
-	             /* inform OpenGL that the data is modified once, but used often */GL_STATIC_DRAW);
+	//auto const bo_size = static_cast<GLsizeiptr>(vertices.size() * sizeof( glm::vec3 ));
+	//glBufferData(GL_ARRAY_BUFFER, /* how many bytes should the buffer contain? */bo_size,
+	//             /* where is the data stored on the CPU? */vertices.data(),
+	//             /* inform OpenGL that the data is modified once, but used often */GL_STATIC_DRAW);
+
+	glBufferData( GL_ARRAY_BUFFER, bo_size, nullptr, GL_STATIC_DRAW );
+
+	glBufferSubData( GL_ARRAY_BUFFER, vertices_offset, vertices_size, static_cast<GLvoid const*>(vertices.data()) );
 
 	// Vertices have been just stored into a buffer, but we still need to
 	// tell Vertex Array where to find them, and how to interpret the data
@@ -109,6 +151,20 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	                      /* once all components of a vertex have been read, how far away (in bytes) is the next vertex? */		0,
 	                      /* how far away (in bytes) from the start of the buffer is the first vertex? */						reinterpret_cast<GLvoid const*>(0x0));
 
+	glBufferSubData( GL_ARRAY_BUFFER, tangents_offset, tangents_size, static_cast<GLvoid const*>(tangents.data()) );
+	glEnableVertexAttribArray( static_cast<unsigned int>(bonobo::shader_bindings::tangents) );
+	glVertexAttribPointer( static_cast<unsigned int>(bonobo::shader_bindings::tangents), 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid const*>(tangents_offset) );
+
+	glBufferSubData( GL_ARRAY_BUFFER, binormals_offset, binormals_size, static_cast<GLvoid const*>(binormals.data()) );
+	glEnableVertexAttribArray( static_cast<unsigned int>(bonobo::shader_bindings::binormals) );
+	glVertexAttribPointer( static_cast<unsigned int>(bonobo::shader_bindings::binormals), 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid const*>(binormals_offset) );
+
+	glBufferSubData( GL_ARRAY_BUFFER, normals_offset, normals_size, static_cast<GLvoid const*>(normals.data()) );
+	glEnableVertexAttribArray( static_cast<unsigned int>(bonobo::shader_bindings::normals) );
+	glVertexAttribPointer( static_cast<unsigned int>(bonobo::shader_bindings::normals), 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<GLvoid const*>(normals_offset) );
+
+	glBindBuffer( GL_ARRAY_BUFFER, 0u );
+
 	// Now, let's allocate a second one for the indices.
 	//
 	// Have the buffer's name stored into `data.ibo`.
@@ -119,8 +175,7 @@ parametric_shapes::createQuad(unsigned int width, unsigned int height)
 	// elements, aka. indices!
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.ibo);
 
-	auto const indices_size = static_cast<GLsizeiptr>(indices.size() * sizeof(glm::vec3));
-	auto const ibo_size = static_cast<GLsizeiptr>(indices_size);
+	auto const ibo_size = static_cast<GLsizeiptr>(indices.size() * sizeof( glm::vec3 ));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, /* bind the previously generated Buffer */data.ibo);
 
 	glBufferData(																	GL_ELEMENT_ARRAY_BUFFER,
