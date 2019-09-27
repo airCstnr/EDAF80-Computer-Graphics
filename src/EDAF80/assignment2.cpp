@@ -112,11 +112,20 @@ edaf80::Assignment2::run()
 
 	// Set whether the default interpolation algorithm should be the linear one;
 	// it can always be changed at runtime through the "Scene Controls" window.
-	bool use_linear = true;
+	bool use_linear = false;
 
 	// Set whether to interpolate the position of an object or not; it can
 	// always be changed at runtime through the "Scene Controls" window.
-	bool interpolate = true;
+	bool interpolate = false;
+
+	// Set the default rotation behaviour;
+	// it can always be changed at runtime through the "Scene Controls" window.
+	bool rotate = false;
+
+	// Set the default rotation speed; it can always be changed at runtime
+	// through the "Scene Controls" window.
+	float rotation_speed = 0.01f;
+	
 
 	// Set up node for the selected geometry
 	auto geometry_node = Node();
@@ -139,8 +148,8 @@ edaf80::Assignment2::run()
 	double fpsNextTick = lastTime + 1.0;
 
 	std::int32_t program_index = 0;
-	auto polygon_mode = bonobo::polygon_mode_t::fill;
-	bool show_logs = true;
+	auto polygon_mode = bonobo::polygon_mode_t::line;
+	bool show_logs = false;
 	bool show_gui = true;
 
 	// Create random path
@@ -184,7 +193,9 @@ edaf80::Assignment2::run()
 
 		ImGui_ImplGlfwGL3_NewFrame();
 
-		geometry_transform_ref.RotateY(0.01f);
+		if(rotate) {
+			geometry_transform_ref.RotateY( rotation_speed );
+		}
 
 		if (interpolate) {
 			// Interpolate the movement of a shape between various control points
@@ -278,10 +289,16 @@ edaf80::Assignment2::run()
 		bool const opened = ImGui::Begin("Scene Controls", nullptr, ImVec2(300, 100), -1.0f, 0);
 		if (opened) {
 			bonobo::uiSelectPolygonMode("Polygon mode", polygon_mode);
+
 			auto selection_result = program_manager.SelectProgram("Shader", program_index);
 			if (selection_result.was_selection_changed) {
 				geometry_node.set_program(selection_result.program, set_uniforms);
 			}
+
+			ImGui::Separator();
+			ImGui::Checkbox("Enable rotation", &rotate);
+			ImGui::SliderFloat( "Rotation speed", &rotation_speed, 0.0f, 1.0f );
+
 			ImGui::Separator();
 			ImGui::Checkbox("Enable interpolation", &interpolate);
 			ImGui::Checkbox("Use linear interpolation", &use_linear);
