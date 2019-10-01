@@ -38,8 +38,8 @@ edaf80::Assignment2::run()
 	//Load the geometry
 	//auto const shape = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
 	//auto const shape = parametric_shapes::createQuad(1u, 1u);
-	//auto const shape = parametric_shapes::createSphere(24, 20, 1);
-	auto const shape = parametric_shapes::createDice( 1.0f );
+	auto const shape = parametric_shapes::createSphere(124, 120, 1);
+	//auto const shape = parametric_shapes::createDice( 1.0f );
 
 	if (shape.vao == 0u)
 		return;
@@ -101,6 +101,16 @@ edaf80::Assignment2::run()
 	if (texcoord_shader == 0u)
 		LogError("Failed to load texcoord shader");
 
+	// Add texture shader, using Celestial Ring shagers from assignment 1
+	GLuint texture_shader = 0u;
+	program_manager.CreateAndRegisterProgram("Texture mapping",
+											 { { ShaderType::vertex, "EDAF80/celestial_ring.vert" },
+											 { ShaderType::fragment, "EDAF80/celestial_ring.frag" } },
+											 texture_shader );
+	if(texture_shader == 0u)
+		LogError( "Failed to generate the “Celestial Ring” shader program: exiting." );
+
+
 	auto const light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
 	auto const set_uniforms = [&light_position](GLuint program){
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
@@ -116,13 +126,17 @@ edaf80::Assignment2::run()
 
 	// Set whether to interpolate the position of an object or not; it can
 	// always be changed at runtime through the "Scene Controls" window.
-	bool interpolate = true;
+	bool interpolate = false;
 
 	// Set up node for the selected geometry
 	auto geometry_node = Node();
 	geometry_node.set_geometry(shape);
 	geometry_node.set_program(&fallback_shader, set_uniforms);
 	TRSTransformf& geometry_transform_ref = geometry_node.get_transform();
+
+	// Add rings to Uranus
+	GLuint const geometry_node_texture = bonobo::loadTexture2D( "earth_diffuse.png" ); //load the earth texture
+	geometry_node.add_texture( "diffuse_texture", geometry_node_texture, GL_TEXTURE_2D );
 
 	//! \todo Create a tesselated torus
 
