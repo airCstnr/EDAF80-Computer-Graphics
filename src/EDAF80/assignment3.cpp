@@ -36,10 +36,12 @@ edaf80::Assignment3::Assignment3(WindowManager& windowManager) :
 void
 edaf80::Assignment3::run()
 {
-	// Load the sphere geometry
-	auto circle_ring_shape = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
-	if (circle_ring_shape.vao == 0u) {
-		LogError("Failed to retrieve the circle ring mesh");
+
+	//Load the geometry
+	//auto const shape = parametric_shapes::createCircleRing(4u, 60u, 1.0f, 2.0f);
+	auto const shape = parametric_shapes::createSphere(24, 20, 1);
+	if (shape.vao == 0u){
+		LogError("Failed to retrieve the shape mesh");
 		return;
 	}
 
@@ -103,9 +105,10 @@ edaf80::Assignment3::run()
 		glUniform1f(glGetUniformLocation(program, "shininess"), shininess);
 	};
 
-	auto circle_ring = Node();
-	circle_ring.set_geometry(circle_ring_shape);
-	circle_ring.set_program(&fallback_shader, set_uniforms);
+	// Set up node for the selected geometry
+	auto geometry_node = Node();
+	geometry_node.set_geometry(shape);
+	geometry_node.set_program(&fallback_shader, set_uniforms);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -167,16 +170,16 @@ edaf80::Assignment3::run()
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		bonobo::changePolygonMode(polygon_mode);
 
-		circle_ring.render(mCamera.GetWorldToClipMatrix());
+		geometry_node.render(mCamera.GetWorldToClipMatrix());
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		bool opened = ImGui::Begin("Scene Control", &opened, ImVec2(300, 100), -1.0f, 0);
 		if (opened) {
 			bonobo::uiSelectPolygonMode("Polygon mode", polygon_mode);
-			auto circle_ring_selection_result = program_manager.SelectProgram("Circle ring", circle_ring_program_index);
-			if (circle_ring_selection_result.was_selection_changed) {
-				circle_ring.set_program(circle_ring_selection_result.program, set_uniforms);
+			auto geometry_node_selection_result = program_manager.SelectProgram("Circle ring", circle_ring_program_index);
+			if (geometry_node_selection_result.was_selection_changed) {
+				geometry_node.set_program(geometry_node_selection_result.program, set_uniforms);
 			}
 			ImGui::Separator();
 			ImGui::ColorEdit3("Ambient", glm::value_ptr(ambient));
