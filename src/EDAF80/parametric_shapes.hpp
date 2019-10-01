@@ -13,6 +13,14 @@ namespace parametric_shapes
 	//!         data
 	bonobo::mesh_data createQuad(unsigned int width, unsigned int height);
 
+	//! \brief Create a dice consisting of a cube shape and make it
+	//!        available to OpenGL.
+	//!
+	//! @param width the width of the dice
+	//! @return wrapper around OpenGL objects' name containing the geometry
+	//!         data
+	bonobo::mesh_data createDice( float const width );
+
 	//! \brief Create a sphere for some tesselation level and make it
 	//!        available to OpenGL.
 	//!
