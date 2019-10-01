@@ -86,6 +86,14 @@ edaf80::Assignment3::run()
 	if (texcoord_shader == 0u)
 		LogError("Failed to load texcoord shader");
 
+	GLuint phong_shader = 0u;
+	program_manager.CreateAndRegisterProgram("Phong shader",
+											{ { ShaderType::vertex, "EDAF80/phong.vert" },
+												{ ShaderType::fragment, "EDAF80/phong.frag" } },
+											phong_shader);
+	if (phong_shader == 0u)
+		LogError("Failed to load phong shader");
+	
 	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
 	auto const set_uniforms = [&light_position](GLuint program){
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
@@ -109,6 +117,18 @@ edaf80::Assignment3::run()
 	auto geometry_node = Node();
 	geometry_node.set_geometry(shape);
 	geometry_node.set_program(&fallback_shader, set_uniforms);
+
+	// Add texture shader, using Celestial Ring shagers from assignment 1
+	GLuint texture_shader = 0u;
+	program_manager.CreateAndRegisterProgram("Texture mapping",
+		{ { ShaderType::vertex, "EDAF80/celestial_ring.vert" },
+		{ ShaderType::fragment, "EDAF80/celestial_ring.frag" } },
+		texture_shader);
+	if (texture_shader == 0u)
+		LogError("Failed to generate the “Celestial Ring” shader program: exiting.");
+
+	GLuint const geometry_node_texture = bonobo::loadTexture2D("earth_diffuse.png"); //load the earth texture
+	geometry_node.add_texture("diffuse_texture", geometry_node_texture, GL_TEXTURE_2D);
 
 	glEnable(GL_DEPTH_TEST);
 

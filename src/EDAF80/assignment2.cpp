@@ -134,7 +134,7 @@ edaf80::Assignment2::run()
 	geometry_node.set_program(&fallback_shader, set_uniforms);
 	TRSTransformf& geometry_transform_ref = geometry_node.get_transform();
 
-	// Add rings to Uranus
+	//Load a texture for the geometry
 	GLuint const geometry_node_texture = bonobo::loadTexture2D( "earth_diffuse.png" ); //load the earth texture
 	geometry_node.add_texture( "diffuse_texture", geometry_node_texture, GL_TEXTURE_2D );
 
