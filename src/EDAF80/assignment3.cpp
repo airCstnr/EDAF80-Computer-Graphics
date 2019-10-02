@@ -93,6 +93,14 @@ edaf80::Assignment3::run()
 											phong_shader);
 	if (phong_shader == 0u)
 		LogError("Failed to load phong shader");
+
+	GLuint normal_mapping_shader = 0u;
+	program_manager.CreateAndRegisterProgram("Normal mapping shader",
+											{ { ShaderType::vertex, "EDAF80/normal_mapping.vert" },
+												{ ShaderType::fragment, "EDAF80/normal_mapping.frag" } },
+											normal_mapping_shader);
+	if (normal_mapping_shader == 0u)
+		LogError("Failed to load normal mapping shader");
 	
 	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
 	auto const set_uniforms = [&light_position](GLuint program){
@@ -129,6 +137,10 @@ edaf80::Assignment3::run()
 
 	GLuint const geometry_node_texture = bonobo::loadTexture2D("earth_diffuse.png"); //load the earth texture
 	geometry_node.add_texture("diffuse_texture", geometry_node_texture, GL_TEXTURE_2D);
+
+	// For normal/bump mapping
+	GLuint const fieldstone_bump_texture = bonobo::loadTexture2D("fieldstone_bump.png");		//load the fieldstone bump texture
+	geometry_node.add_texture("fieldstone_bump_texture", fieldstone_bump_texture, GL_TEXTURE_2D);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -199,7 +211,7 @@ edaf80::Assignment3::run()
 			bonobo::uiSelectPolygonMode("Polygon mode", polygon_mode);
 			auto geometry_node_selection_result = program_manager.SelectProgram("Circle ring", circle_ring_program_index);
 			if (geometry_node_selection_result.was_selection_changed) {
-				geometry_node.set_program(geometry_node_selection_result.program, set_uniforms);
+				geometry_node.set_program(geometry_node_selection_result.program, phong_set_uniforms);
 			}
 			ImGui::Separator();
 			ImGui::ColorEdit3("Ambient", glm::value_ptr(ambient));

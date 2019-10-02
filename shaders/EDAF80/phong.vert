@@ -26,8 +26,8 @@ out VS_OUT {
 
 void main()
 {
-	vec3 world_position	= (vertex_model_to_world*vec4(vertex,1)).xyz;		// transform vertex to world space			
-	vs_out.normal		= (normal_model_to_world*vec4(normal,1)).xyz;	    // transform normal to world space and pass onto RAST/FS
+	vec3 world_position	= (vertex_model_to_world*vec4(vertex,1.0)).xyz;		// transform vertex to world space			
+	vs_out.normal		= (normal_model_to_world*vec4(normal,1.0)).xyz;	    // transform normal to world space and pass onto RAST/FS
 	vs_out.light		= light_position - world_position;					// compute light vector and pass onto RAST/FS
 	vs_out.view 		= camera_position - world_position;					// compute view/camera vector and pass onto RAST/FS
 	gl_Position			= vertex_world_to_clip*vec4(world_position, 1.0);	// transform vertex position to clip space
