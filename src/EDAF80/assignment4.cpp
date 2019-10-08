@@ -13,6 +13,10 @@
 
 #include <stdexcept>
 
+#include "parametric_shapes.hpp"
+#include "core/node.hpp"
+#include <glm/gtc/type_ptr.hpp>
+
 edaf80::Assignment4::Assignment4(WindowManager& windowManager) :
 	mCamera(0.5f * glm::half_pi<float>(),
 	        static_cast<float>(config::resolution_x) / static_cast<float>(config::resolution_y),
@@ -30,6 +34,7 @@ edaf80::Assignment4::Assignment4(WindowManager& windowManager) :
 void
 edaf80::Assignment4::run()
 {
+
 	// Set up the camera
 	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
 	mCamera.mMouseSensitivity = 0.003f;
@@ -52,9 +57,50 @@ edaf80::Assignment4::run()
 	//       (Check how it was done in assignment 3.)
 	//
 
+	// Create and load the water shader
+	GLuint water_shader = 0u;
+	program_manager.CreateAndRegisterProgram("Water",
+											{ { ShaderType::vertex, "EDAF80/water.vert" },
+											{ ShaderType::fragment, "EDAF80/water.frag" } },
+											water_shader);
+	if (water_shader == 0u) {
+		LogError("Failed to load water shader");
+		return;
+	}
+
+
 	//
 	// Todo: Load your geometry
 	//
+
+	//Load the quad shape
+	//auto const shape = parametric_shapes::createQuad(1u, 1u);
+	auto const shape = parametric_shapes::createQuadTess(2u, 2u, 50u);
+	if (shape.vao == 0u) {
+		LogError("Failed to retrieve the shape mesh");
+		return;
+	}
+
+	// Set up the uniforms
+	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
+	auto camera_position = mCamera.mWorld.GetTranslation();
+	auto ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+	auto diffuse = glm::vec3(0.7f, 0.2f, 0.4f);
+	auto specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	auto shininess = 1.0f;
+	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess](GLuint program) {
+		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
+		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
+		glUniform3fv(glGetUniformLocation(program, "ambient"), 1, glm::value_ptr(ambient));
+		glUniform3fv(glGetUniformLocation(program, "diffuse"), 1, glm::value_ptr(diffuse));
+		glUniform3fv(glGetUniformLocation(program, "specular"), 1, glm::value_ptr(specular));
+		glUniform1f(glGetUniformLocation(program, "shininess"), shininess);
+	};
+
+	// Set up node for the selected geometry
+	auto geometry_node = Node();
+	geometry_node.set_geometry(shape);
+	geometry_node.set_program(&water_shader, phong_set_uniforms);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -109,6 +155,8 @@ edaf80::Assignment4::run()
 		//
 
 
+
+
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
 		glViewport(0, 0, framebuffer_width, framebuffer_height);
@@ -120,7 +168,11 @@ edaf80::Assignment4::run()
 			//
 			// Todo: Render all your geometry here.
 			//
+
+
+			geometry_node.render(mCamera.GetWorldToClipMatrix());
 		}
+
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

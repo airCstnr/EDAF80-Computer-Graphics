@@ -4,6 +4,7 @@
 
 namespace parametric_shapes
 {
+
 	//! \brief Create a quad consisting of two triangles and make it
 	//!        available to OpenGL.
 	//!
@@ -12,6 +13,16 @@ namespace parametric_shapes
 	//! @return wrapper around OpenGL objects' name containing the geometry
 	//!         data
 	bonobo::mesh_data createQuad(unsigned int width, unsigned int height);
+
+	//! \brief Create a quad consisting of a variable number of vertices and make it
+	//!        available to OpenGL.
+	//!
+	//! @param width the width of the quad
+	//! @param height the height of the quad
+	//! @param number of vertices in one direction
+	//! @return wrapper around OpenGL objects' name containing the geometry
+	//!         data
+	bonobo::mesh_data createQuadTess(unsigned int width, unsigned int height, unsigned int res);
 
 	//! \brief Create a dice consisting of a cube shape and make it
 	//!        available to OpenGL.
