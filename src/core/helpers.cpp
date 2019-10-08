@@ -291,12 +291,12 @@ bonobo::loadTextureCubeMap(std::string const& posx, std::string const& negx,
 	// Create an OpenGL texture object. Similarly to `glGenVertexArrays()`
 	// and `glGenBuffers()` that were used in assignment 2,
 	// `glGenTextures()` can create `n` texture objects at once. Here we
-	// only one texture object that will contain our whole cube map.
-	glGenTextures(1, /*! \todo fill me */nullptr);
+	// only want one texture object that will contain our whole cube map.
+	glGenTextures(1, &texture);
 	assert(texture != 0u);
 
 	// Similarly to vertex arrays and buffers, we first need to bind the
-	// texture object in orther to use it. Here we will bind it to the
+	// texture object in order to use it. Here we will bind it to the
 	// GL_TEXTURE_CUBE_MAP target to indicate we want a cube map. If you
 	// look at `bonobo::loadTexture2D()` just above, you will see that
 	// GL_TEXTURE_2D is used there, as we want a simple 2D-texture.
@@ -309,7 +309,7 @@ bonobo::loadTextureCubeMap(std::string const& posx, std::string const& negx,
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	// Set the minification and magnification properties of the textures;
-	// you can have a look on http://docs.gl to lear more about them, or
+	// you can have a look on http://docs.gl to learn more about them, or
 	// attend EDAN35 in the next period ;-)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, generate_mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -343,7 +343,39 @@ bonobo::loadTextureCubeMap(std::string const& posx, std::string const& negx,
 	             /* the type of each component */GL_UNSIGNED_BYTE,
 	             /* the pointer to the actual data on the CPU */reinterpret_cast<GLvoid const*>(data.data()));
 
-	//! \todo repeat now the texture filling for the 5 remaining faces
+	// Positive X
+	data = getTextureData( "cubemaps/" + posx, width, height, false );
+	if(data.empty()) { glDeleteTextures( 1, &texture ); return 0u; }
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, static_cast<GLsizei>(width), static_cast<GLsizei>(height), 0, GL_RGBA, GL_UNSIGNED_BYTE, reinterpret_cast<GLvoid const*>(data.data()) );
+
+	// Negative Y
+	data = getTextureData( "cubemaps/" + negy, width, height, false );
+	if(data.empty()) {
+		glDeleteTextures( 1, &texture ); return 0u;
+	}
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, static_cast<GLsizei>(width), static_cast<GLsizei>(height), 0, GL_RGBA, GL_UNSIGNED_BYTE, reinterpret_cast<GLvoid const*>(data.data()) );
+
+	// Positive Y
+	data = getTextureData( "cubemaps/" + posy, width, height, false );
+	if(data.empty()) {
+		glDeleteTextures( 1, &texture ); return 0u;
+	}
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, static_cast<GLsizei>(width), static_cast<GLsizei>(height), 0, GL_RGBA, GL_UNSIGNED_BYTE, reinterpret_cast<GLvoid const*>(data.data()) );
+
+	// Negative Z
+	data = getTextureData( "cubemaps/" + negz, width, height, false );
+	if(data.empty()) {
+		glDeleteTextures( 1, &texture ); return 0u;
+	}
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, static_cast<GLsizei>(width), static_cast<GLsizei>(height), 0, GL_RGBA, GL_UNSIGNED_BYTE, reinterpret_cast<GLvoid const*>(data.data()) );
+
+	// Positive Z
+	data = getTextureData( "cubemaps/" + posz, width, height, false );
+	if(data.empty()) {
+		glDeleteTextures( 1, &texture ); return 0u;
+	}
+	glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, static_cast<GLsizei>(width), static_cast<GLsizei>(height), 0, GL_RGBA, GL_UNSIGNED_BYTE, reinterpret_cast<GLvoid const*>(data.data()) );
+
 
 	if (generate_mipmap)
 		// Generate the mipmap hierarchy; wait for EDAN35 to understand

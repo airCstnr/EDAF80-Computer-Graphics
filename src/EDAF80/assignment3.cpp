@@ -101,6 +101,14 @@ edaf80::Assignment3::run()
 											normal_mapping_shader);
 	if (normal_mapping_shader == 0u)
 		LogError("Failed to load normal mapping shader");
+
+	GLuint skybox_shader = 0u;
+	program_manager.CreateAndRegisterProgram( "Sky Box",
+											 { { ShaderType::vertex, "EDAF80/skybox.vert" },
+											   { ShaderType::fragment, "EDAF80/skybox.frag" } },
+											 skybox_shader );
+	if(skybox_shader == 0u)
+		LogError( "Failed to load texcoord shader" );
 	
 	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
 	auto const set_uniforms = [&light_position](GLuint program){
@@ -141,6 +149,15 @@ edaf80::Assignment3::run()
 	// For normal/bump mapping
 	GLuint const fieldstone_bump_texture = bonobo::loadTexture2D("fieldstone_bump.png");		//load the fieldstone bump texture
 	geometry_node.add_texture("fieldstone_bump_texture", fieldstone_bump_texture, GL_TEXTURE_2D);
+
+	// Cube map load texture
+	auto my_cube_map_id = bonobo::loadTextureCubeMap( "sunset_sky/posx.png", "sunset_sky/negx.png",
+													  "sunset_sky/posy.png", "sunset_sky/negy.png",
+													  "sunset_sky/posz.png", "sunset_sky/negz.png",
+													  true );
+
+	// Add cube map to current node
+	geometry_node.add_texture( "cube_map", my_cube_map_id, GL_TEXTURE_CUBE_MAP );
 
 	glEnable(GL_DEPTH_TEST);
 
