@@ -1,6 +1,15 @@
 #version 410
 
-// Remember how we enabled vertex attributes in assignment 2 and attached some
+/*
+	EDAF 80 Fall 2019
+	Raphael Castanier
+	Niklas Karlsson
+*/
+
+// Water Shader for Assignment 4
+
+
+// Remember how we enabled vertex attributes in assignmentÂ 2 and attached some
 // data to each of them, here we retrieve that data. Attribute 0 pointed to the
 // vertices inside the OpenGL buffer object, so if we say that our input
 // variable `vertex` is at location 0, which corresponds to attribute 0 of our
