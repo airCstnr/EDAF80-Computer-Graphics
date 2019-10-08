@@ -75,7 +75,7 @@ edaf80::Assignment4::run()
 
 	//Load the quad shape
 	//auto const shape = parametric_shapes::createQuad(1u, 1u);
-	auto const shape = parametric_shapes::createQuadTess(2u, 2u, 50u);
+	auto const shape = parametric_shapes::createQuadTess(2u, 2u, 4u);
 	if (shape.vao == 0u) {
 		LogError("Failed to retrieve the shape mesh");
 		return;
