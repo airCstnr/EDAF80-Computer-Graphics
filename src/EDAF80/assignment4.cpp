@@ -74,7 +74,7 @@ edaf80::Assignment4::run()
 
 	//Load the quad shape
 	//auto const shape = parametric_shapes::createQuad(1u, 1u);
-	auto const shape = parametric_shapes::createQuadTess(200u, 200u, 50u);
+	auto const shape = parametric_shapes::createQuadTess(2000u, 2000u, 500u);
 	if (shape.vao == 0u) {
 		LogError("Failed to retrieve the shape mesh");
 		return;
@@ -83,25 +83,31 @@ edaf80::Assignment4::run()
 	// Set up the uniforms
 	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
 	auto camera_position = mCamera.mWorld.GetTranslation();
-	auto ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-	auto diffuse = glm::vec3(0.7f, 0.2f, 0.4f);
-	auto specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	auto shininess = 1.0f;
 	auto time = 0.0f;
-	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess, &time](GLuint program) {
+	auto const set_uniforms = [&light_position, &camera_position, &time](GLuint program) {
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
 		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
-		glUniform3fv(glGetUniformLocation(program, "ambient"), 1, glm::value_ptr(ambient));
-		glUniform3fv(glGetUniformLocation(program, "diffuse"), 1, glm::value_ptr(diffuse));
-		glUniform3fv(glGetUniformLocation(program, "specular"), 1, glm::value_ptr(specular));
-		glUniform1f(glGetUniformLocation(program, "shininess"), shininess);
 		glUniform1f(glGetUniformLocation(program, "time" ), time );
 	};
 
 	// Set up node for the selected geometry
 	auto geometry_node = Node();
 	geometry_node.set_geometry(shape);
-	geometry_node.set_program(&water_shader, phong_set_uniforms);
+	geometry_node.set_program(&water_shader, set_uniforms);
+
+
+	// Cloudy hills cubemap set
+	auto my_cube_map_id = bonobo::loadTextureCubeMap(	"cloudyhills/posx.png", "cloudyhills/negx.png",
+														"cloudyhills/posy.png", "cloudyhills/negy.png",
+														"cloudyhills/posz.png", "cloudyhills/negz.png",
+													true);
+
+	// Add cube map to current node
+	geometry_node.add_texture("cube_map", my_cube_map_id, GL_TEXTURE_CUBE_MAP);
+
+	// For wave ripples
+	GLuint const wave_ripple_texture = bonobo::loadTexture2D("waves.png");
+	geometry_node.add_texture("wave_ripple_texture", wave_ripple_texture, GL_TEXTURE_2D);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -191,7 +197,7 @@ edaf80::Assignment4::run()
 			bonobo::uiSelectPolygonMode( "Polygon mode", polygon_mode );
 			auto geometry_node_selection_result = program_manager.SelectProgram( "Fallback", fallback_program_index );
 			if(geometry_node_selection_result.was_selection_changed) {
-				geometry_node.set_program( geometry_node_selection_result.program, phong_set_uniforms );
+				geometry_node.set_program( geometry_node_selection_result.program, set_uniforms );
 			}
 		}
 		ImGui::End();
