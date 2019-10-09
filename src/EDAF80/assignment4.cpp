@@ -36,7 +36,8 @@ edaf80::Assignment4::run()
 {
 
 	// Set up the camera
-	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
+	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 3.0f, 6.0f));
+	mCamera.mWorld.SetRotateX( 50 );
 	mCamera.mMouseSensitivity = 0.003f;
 	mCamera.mMovementSpeed = 0.025;
 
@@ -74,7 +75,7 @@ edaf80::Assignment4::run()
 
 	//Load the quad shape
 	//auto const shape = parametric_shapes::createQuad(1u, 1u);
-	auto const shape = parametric_shapes::createQuadTess(2u, 2u, 4u);
+	auto const shape = parametric_shapes::createQuadTess(2u, 2u, 50u);
 	if (shape.vao == 0u) {
 		LogError("Failed to retrieve the shape mesh");
 		return;
@@ -186,9 +187,9 @@ edaf80::Assignment4::run()
 		if(opened) {
 			bonobo::uiSelectPolygonMode( "Polygon mode", polygon_mode );
 			auto geometry_node_selection_result = program_manager.SelectProgram( "Fallback", fallback_program_index );
-			/*if(geometry_node_selection_result.was_selection_changed) {
+			if(geometry_node_selection_result.was_selection_changed) {
 				geometry_node.set_program( geometry_node_selection_result.program, phong_set_uniforms );
-			}*/
+			}
 		}
 		ImGui::End();
 
