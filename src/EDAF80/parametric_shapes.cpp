@@ -155,6 +155,7 @@ parametric_shapes::createQuadTess(unsigned int width, unsigned int height, unsig
 	auto tangents = std::vector<glm::vec3>(vertices_nb);
 	auto binormals = std::vector<glm::vec3>(vertices_nb);
 
+	
 	float	w  = 0,
 			dw = width/(static_cast<float>(res) -1),
 			h  = 0,
@@ -178,18 +179,17 @@ parametric_shapes::createQuadTess(unsigned int width, unsigned int height, unsig
 											0.0f);
 
 			// tangent
-			auto t = glm::uvec3(0);
-			//t = glm::normalize(t);
+			auto t = glm::vec3(1.0f,0.0f,0.0f);
+			t = glm::normalize(t);
 			tangents[index] = t;
 
 			// binormal
-			auto b = glm::uvec3(0);
-			//b = glm::normalize(b);
+			auto b = glm::vec3(0,0,1);
+			b = glm::normalize(b);
 			binormals[index] = b;
 
 			// normal
-			auto n = glm::uvec3(0);
-			// auto n = glm::cross(t, b);
+			auto n = glm::cross(t, b);
 			normals[index] = n;
 
 			h += dh;
@@ -199,6 +199,7 @@ parametric_shapes::createQuadTess(unsigned int width, unsigned int height, unsig
 		w += dw;
 
 	}
+
 	// indices layout for res = 4
 	/*
 	12--13--14-15
@@ -214,8 +215,8 @@ parametric_shapes::createQuadTess(unsigned int width, unsigned int height, unsig
 	| / | / | / |
 	|/  |/  |/  |
 	0---1---2---3
-	 
-*/
+
+	*/
 
 	// create indices array
 	auto indices = std::vector<glm::uvec3>(2u * (res - 1u) * (res - 1u));
@@ -226,16 +227,17 @@ parametric_shapes::createQuadTess(unsigned int width, unsigned int height, unsig
 	{
 		for (unsigned int j = 0u; j < res - 1u; ++j)
 		{
-			indices[index] = glm::uvec3(i + j *res,
-										i + j * res + 1u,
-										i + j * res + 5u);
+			indices[index] = glm::uvec3(i + j*res,
+										i + j*res + 1u,
+										i + j*res + res + 1u);
 			++index;
 
-			indices[index] = glm::uvec3(i + j * res,
-										i + j * res + 5u,
-										i + j * res + 4u);
+			indices[index] = glm::uvec3(i + j*res,
+										i + j*res + res + 1u,
+										i + j*res + res);
 			++index;
 		}
+
 	}
 
 	bonobo::mesh_data data;
@@ -262,11 +264,8 @@ parametric_shapes::createQuadTess(unsigned int width, unsigned int height, unsig
 
 	glGenBuffers(1, &data.bo);
 	assert(data.bo != 0u);
-	glBindBuffer(GL_ARRAY_BUFFER,  data.bo);
-	glBufferData(	GL_ARRAY_BUFFER,
-					bo_size,
-					nullptr,
-					GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, data.bo);
+	glBufferData(GL_ARRAY_BUFFER, bo_size, nullptr, GL_STATIC_DRAW);
 
 	glBufferSubData(GL_ARRAY_BUFFER, vertices_offset, vertices_size, static_cast<GLvoid const*>(vertices.data()));
 	glEnableVertexAttribArray(static_cast<unsigned int>(bonobo::shader_bindings::vertices));

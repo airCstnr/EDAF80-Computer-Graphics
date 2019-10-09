@@ -37,7 +37,7 @@ edaf80::Assignment4::run()
 
 	// Set up the camera
 	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 3.0f, 6.0f));
-	mCamera.mWorld.SetRotateX( 50 );
+	mCamera.mWorld.SetRotateX(50.0f);
 	mCamera.mMouseSensitivity = 0.003f;
 	mCamera.mMovementSpeed = 0.025;
 
@@ -67,7 +67,6 @@ edaf80::Assignment4::run()
 		LogError("Failed to load water shader");
 		return;
 	}
-
 
 	//
 	// Load the geometry
@@ -102,7 +101,7 @@ edaf80::Assignment4::run()
 	// Set up node for the selected geometry
 	auto geometry_node = Node();
 	geometry_node.set_geometry(shape);
-	geometry_node.set_program(&fallback_shader, phong_set_uniforms);
+	geometry_node.set_program(&water_shader, phong_set_uniforms);
 
 	glEnable(GL_DEPTH_TEST);
 

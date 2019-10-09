@@ -54,6 +54,7 @@ float y_wave(float x, float z, int wave) {
 
 void main()
 {
+
 	vec3 vert = vertex;
 
 	// change y vertex value using waves
