@@ -34,19 +34,19 @@ out VS_OUT {
 //	float sharpness;
 //} w1, w2;
 
-//uniform wave w1 = {01, 0.2, 0.1};
-uniform float amplitude[2] = {1.0, 0.5}; // one other way to do it
-uniform float frequency[2] = {0.2, 0.4}; // one other way to do it
-uniform float phase[2] = {0.5, 1.3}; // one other way to do it
-uniform float sharpness[2] = {2.0, 2.0}; // one other way to do it
-uniform vec2 direction[2] = {vec2(-1.0, 0.2), vec2(-0.7, 0.7)}; // one other way to do it
+// one other way to do it is fixing values in vertex shader
+uniform float amplitude[2] = {1.0, 0.5};
+uniform float frequency[2] = {0.2, 0.4};
+uniform float phase[2]     = {0.5, 1.3};
+uniform float sharpness[2] = {2.0, 2.0};
+uniform vec2  direction[2] = {vec2(-1.0, 0.2), vec2(-0.7, 0.7)};
 
 // Function for computing vertex altitude from position, time and wave parameters
-float y_wave(float x, float z, float t, int wave) {
+float y_wave(float x, float z, int wave) {
 	// formula from course
 	float ret = direction[wave][0] * x + direction[wave][1] * z;
 	ret *= frequency[wave];
-	ret += t * phase[wave];
+	ret += time * phase[wave];
 	ret = sin(ret) * 0.5 + 0.5;
 	ret = pow(ret, sharpness[wave]);
 	ret *= amplitude[wave];
@@ -83,8 +83,8 @@ void main()
 	vec3 vert = vertex;
 
 	// change y vertex value using waves
-	vert.y += y_wave(vert.x, vert.z, time, 0);
-	vert.y += y_wave(vert.x, vert.z, time, 1);
+	vert.y += y_wave(vert.x, vert.z, 0);
+	vert.y += y_wave(vert.x, vert.z, 1);
 
 	float xder0 = wave_der_x(vert.x, vert.z, time, 0);
 	float zder0 = wave_der_z(vert.x, vert.z, time, 0);
