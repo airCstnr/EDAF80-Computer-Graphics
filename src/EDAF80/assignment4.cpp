@@ -75,7 +75,7 @@ edaf80::Assignment4::run()
 
 	//Load the quad shape
 	//auto const shape = parametric_shapes::createQuad(1u, 1u);
-	auto const shape = parametric_shapes::createQuadTess(2u, 2u, 50u);
+	auto const shape = parametric_shapes::createQuadTess(200u, 200u, 50u);
 	if (shape.vao == 0u) {
 		LogError("Failed to retrieve the shape mesh");
 		return;
@@ -88,15 +88,16 @@ edaf80::Assignment4::run()
 	auto diffuse = glm::vec3(0.7f, 0.2f, 0.4f);
 	auto specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	auto shininess = 1.0f;
-	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess](GLuint program) {
+	auto time = 0.0f;
+	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess, &time](GLuint program) {
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
 		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
 		glUniform3fv(glGetUniformLocation(program, "ambient"), 1, glm::value_ptr(ambient));
 		glUniform3fv(glGetUniformLocation(program, "diffuse"), 1, glm::value_ptr(diffuse));
 		glUniform3fv(glGetUniformLocation(program, "specular"), 1, glm::value_ptr(specular));
 		glUniform1f(glGetUniformLocation(program, "shininess"), shininess);
+		glUniform1f(glGetUniformLocation(program, "time" ), time );
 	};
-	auto time = 0.0f;
 
 	// Set up node for the selected geometry
 	auto geometry_node = Node();
@@ -117,7 +118,7 @@ edaf80::Assignment4::run()
 	double fpsNextTick = lastTime + 1000.0;
 
 	std::int32_t fallback_program_index = 0;
-	auto polygon_mode = bonobo::polygon_mode_t::fill;
+	auto polygon_mode = bonobo::polygon_mode_t::line;
 	bool show_logs = false;
 	bool show_gui = true;
 	bool shader_reload_failed = false;
@@ -130,6 +131,8 @@ edaf80::Assignment4::run()
 			fpsSamples = 0;
 		}
 		fpsSamples++;
+
+		time += 0.1;
 
 		auto& io = ImGui::GetIO();
 		inputHandler.SetUICapture(io.WantCaptureMouse, io.WantCaptureKeyboard);
