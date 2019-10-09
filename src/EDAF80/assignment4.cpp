@@ -96,6 +96,7 @@ edaf80::Assignment4::run()
 		glUniform3fv(glGetUniformLocation(program, "specular"), 1, glm::value_ptr(specular));
 		glUniform1f(glGetUniformLocation(program, "shininess"), shininess);
 	};
+	auto time = 0.0f;
 
 	// Set up node for the selected geometry
 	auto geometry_node = Node();
