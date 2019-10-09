@@ -15,6 +15,8 @@ uniform mat4 vertex_world_to_clip;
 uniform vec3 camera_position;	// defined in world space
 
 in VS_OUT {
+	float xder;
+	float zder;
 	vec3 vertex;				// from RAST/VS
 	vec3 normal;				// from RAST/VS
 } fs_in;
@@ -25,15 +27,17 @@ void main()
 {
 
 	vec3 V 		= camera_position - fs_in.vertex;			// compute view/camera vector
+	V = normalize(V);
 
 	// Normal computation
-	vec3 n				= vec3(0.0, 1.0, 0.0);				// compute normals from shape of wavw
+
+	vec3 n	  = vec3(-fs_in.xder, 1.0, -fs_in.zder);		// compute normals from shape of wave
 
 	//Water color 
 	vec4 color_deep		= vec4(0.0, 0.0, 0.1, 1.0);			// deep color
 	vec4 color_shallow	= vec4(0.0, 0.5, 0.5, 1.0);			// shallow color
-	float facing		= 1 - max(dot(V, n),0.0);			// compute facing component
+	float facing		= 1 - max(dot(V, n), 0.0);			// compute facing component
 
-	frag_color = mix(color_deep, color_shallow, color_shallow);	// pixel color is a mix of deep, shallow and facing
+	frag_color = mix(color_deep, color_shallow, facing);	// pixel color is a mix of deep, shallow and facing
 
 }

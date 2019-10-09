@@ -20,6 +20,8 @@ uniform mat4 vertex_world_to_clip;
 uniform float time;
 
 out VS_OUT {
+	float xder;
+	float zder;
 	vec3 vertex;
 	vec3 normal;
 } vs_out;
@@ -50,6 +52,29 @@ float y_wave(float x, float z, float t, int wave) {
 	ret *= amplitude[wave];
 	return ret;
 }
+float wave_der_x(float x, float z, float t, int wave) {
+	// formula from course
+	float ret = direction[wave][0] * x + direction[wave][1] * z;
+	ret *= frequency[wave];
+	ret += t * phase[wave];
+	float sin_part = sin(ret) * 0.5 + 0.5;
+	float cos_part = cos(ret);
+	sin_part = pow(sin_part, sharpness[wave]-1);
+	float ans = 0.5 * sharpness[wave] * frequency[wave] * amplitude[wave] * sin_part * cos_part * direction[wave][0];
+	return ans;
+}
+
+float wave_der_z(float x, float z, float t, int wave) {
+	// formula from course
+	float ret = direction[wave][0] * x + direction[wave][1] * z;
+	ret *= frequency[wave];
+	ret += t * phase[wave];
+	float sin_part = sin(ret) * 0.5 + 0.5;
+	float cos_part = cos(ret);
+	sin_part = pow(sin_part, sharpness[wave]-1);
+	float ans = 0.5 * sharpness[wave] * frequency[wave] * amplitude[wave] * sin_part * cos_part * direction[wave][1];
+	return ans;
+} 
 
 
 void main()
@@ -60,6 +85,14 @@ void main()
 	// change y vertex value using waves
 	vert.y += y_wave(vert.x, vert.z, time, 0);
 	vert.y += y_wave(vert.x, vert.z, time, 1);
+
+	float xder0 = wave_der_x(vert.x, vert.z, time, 0);
+	float zder0 = wave_der_z(vert.x, vert.z, time, 0);
+	float xder1 = wave_der_x(vert.x, vert.z, time, 1);
+	float zder1 = wave_der_z(vert.x, vert.z, time, 1);
+
+	vs_out.xder = xder0 + xder1;
+	vs_out.zder = zder0 + zder1;
 
 	vs_out.vertex = vec3(vertex_model_to_world * vec4(vert, 1.0));
 	vs_out.normal = vec3(normal_model_to_world * vec4(normal, 0.0));
