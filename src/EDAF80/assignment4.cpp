@@ -36,7 +36,7 @@ edaf80::Assignment4::run()
 {
 
 	// Set up the camera
-	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
+	mCamera.mWorld.SetTranslate(glm::vec3(1.0f, 3.0f, 6.0f));
 	mCamera.mMouseSensitivity = 0.003f;
 	mCamera.mMovementSpeed = 0.025;
 
@@ -68,14 +68,14 @@ edaf80::Assignment4::run()
 		return;
 	}
 
-
 	//
 	// Todo: Load your geometry
 	//
 
 	//Load the quad shape
 	//auto const shape = parametric_shapes::createQuad(1u, 1u);
-	auto const shape = parametric_shapes::createQuadTess(2u, 2u, 4u);
+	auto const shape = parametric_shapes::createQuadTess(1u, 1u, 3u);
+	
 	if (shape.vao == 0u) {
 		LogError("Failed to retrieve the shape mesh");
 		return;
@@ -100,7 +100,7 @@ edaf80::Assignment4::run()
 	// Set up node for the selected geometry
 	auto geometry_node = Node();
 	geometry_node.set_geometry(shape);
-	geometry_node.set_program(&water_shader, phong_set_uniforms);
+	geometry_node.set_program(&fallback_shader, phong_set_uniforms);
 
 	glEnable(GL_DEPTH_TEST);
 
