@@ -47,6 +47,7 @@ float y_wave(float x, float z, float t, wave w) {
 
 void main()
 {
+
 	vs_out.vertex = vec3(vertex_model_to_world * vec4(vertex, 1.0));
 	vs_out.normal = vec3(normal_model_to_world * vec4(normal, 0.0));
 
