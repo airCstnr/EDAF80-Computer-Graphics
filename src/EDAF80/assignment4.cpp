@@ -53,8 +53,7 @@ edaf80::Assignment4::run()
 	}
 
 	//
-	// Todo: Insert the creation of other shader programs.
-	//       (Check how it was done in assignment 3.)
+	// Creation of other shader programs.
 	//
 
 	// Create and load the water shader
@@ -70,7 +69,7 @@ edaf80::Assignment4::run()
 
 
 	//
-	// Todo: Load your geometry
+	// Load the geometry
 	//
 
 	//Load the quad shape
@@ -100,7 +99,7 @@ edaf80::Assignment4::run()
 	// Set up node for the selected geometry
 	auto geometry_node = Node();
 	geometry_node.set_geometry(shape);
-	geometry_node.set_program(&water_shader, phong_set_uniforms);
+	geometry_node.set_program(&fallback_shader, phong_set_uniforms);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -115,7 +114,9 @@ edaf80::Assignment4::run()
 	double nowTime, lastTime = GetTimeMilliseconds();
 	double fpsNextTick = lastTime + 1000.0;
 
-	bool show_logs = true;
+	std::int32_t fallback_program_index = 0;
+	auto polygon_mode = bonobo::polygon_mode_t::fill;
+	bool show_logs = false;
 	bool show_gui = true;
 	bool shader_reload_failed = false;
 
@@ -164,6 +165,8 @@ edaf80::Assignment4::run()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+		bonobo::changePolygonMode( polygon_mode );
+
 		if (!shader_reload_failed) {
 			//
 			// Todo: Render all your geometry here.
@@ -177,9 +180,17 @@ edaf80::Assignment4::run()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		//
-		// Todo: If you want a custom ImGUI window, you can set it up
-		//       here
+		// custom ImGUI window
 		//
+		bool opened = ImGui::Begin( "Scene Control", &opened, ImVec2( 300, 100 ), -1.0f, 0 );
+		if(opened) {
+			bonobo::uiSelectPolygonMode( "Polygon mode", polygon_mode );
+			auto geometry_node_selection_result = program_manager.SelectProgram( "Fallback", fallback_program_index );
+			/*if(geometry_node_selection_result.was_selection_changed) {
+				geometry_node.set_program( geometry_node_selection_result.program, phong_set_uniforms );
+			}*/
+		}
+		ImGui::End();
 
 		if (show_logs)
 			Log::View::Render();
