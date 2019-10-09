@@ -23,7 +23,7 @@ out vec4 frag_color;
 
 void main()
 {
-	
+
 	vec3 V 		= camera_position - fs_in.vertex;			// compute view/camera vector
 
 	// Normal computation
@@ -35,4 +35,5 @@ void main()
 	float facing		= 1 - max(dot(V, n),0.0);			// compute facing component
 
 	frag_color = mix(color_deep, color_shallow, color_shallow);	// pixel color is a mix of deep, shallow and facing
+
 }
