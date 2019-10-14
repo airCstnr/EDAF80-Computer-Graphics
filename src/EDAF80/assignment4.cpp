@@ -97,13 +97,13 @@ edaf80::Assignment4::run()
 
 
 	// Cloudy hills cubemap set
-	auto my_cube_map_id = bonobo::loadTextureCubeMap(	"cloudyhills/posx.png", "cloudyhills/negx.png",
-														"cloudyhills/posy.png", "cloudyhills/negy.png",
-														"cloudyhills/posz.png", "cloudyhills/negz.png",
-													true);
+	auto cube_map = bonobo::loadTextureCubeMap(	"cloudyhills/posx.png", "cloudyhills/negx.png",
+												"cloudyhills/posy.png", "cloudyhills/negy.png",
+												"cloudyhills/posz.png", "cloudyhills/negz.png",
+												true);
 
 	// Add cube map to current node
-	geometry_node.add_texture("cube_map", my_cube_map_id, GL_TEXTURE_CUBE_MAP);
+	geometry_node.add_texture("cube_map", cube_map, GL_TEXTURE_CUBE_MAP);
 
 	// For wave ripples
 	GLuint const wave_ripple_texture = bonobo::loadTexture2D("waves.png");
