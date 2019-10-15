@@ -83,6 +83,15 @@ void main()
 
 		// TODO n_ripple needs to be added to the pixel color computation
 
+	// Fresnel terms (reflection)
+	// How much light reflacts at a glancing angle
+
+		float R0 = 0.02037; // air to water
+		float fastFresnel = R0 + (1-R0)*pow((1 - dot(V,n)),5.0);
+
+		// Update reflection color with fresnel term
+		reflection = reflection * fastFresnel;
+
 	//Water color 
 	vec4 color_deep		= vec4(0.0, 0.0, 0.1, 1.0);			// deep color
 	vec4 color_shallow	= vec4(0.0, 0.5, 0.5, 1.0);			// shallow color
