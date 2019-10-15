@@ -51,27 +51,26 @@ void main()
 
 	// Reflection
 
+		/*
+		Reflect a scene's sky box onto a surface
+		Use GLSL reflect() function to get direction towards sky box
+		Take the color from the points it hit and add to frag_color
+		*/
+
+		// Compute reflection vector
+		vec3 R = normalize(reflect(-V, n));			// Formula from slides
+
+		// Find out the reflection color 
+		vec4 reflection = texture(cube_map, R);
+		
+	// Animated Normal mapping
+
 		// Define TBN matrix
 		vec3 t = vec3(1, fs_in.xder, 0);
 		vec3 b = vec3(0, fs_in.zder, 1);
 		mat3 TBN = mat3(t, b, n);
 
-		// Look up normals from cube map (range [0, 1])
-		// Combination off skybox.frag and normal_mapping.frag, not sure if this is correct?
-		vec3 n_cube = texture(cube_map, fs_in.vertex).rgb;
-
-		// transform vector to range [-1, 1]
-		n_cube = normalize(n_cube * 2.0 -1.0);
-
-		// transform looked up normals to world space
-		vec3 N = TBN * n_cube;
-
-		// Compute reflection term
-		vec3 R = normalize(reflect(-V, N));					// Formula from slides 
-
-	// Animated Normal mapping
-
-		// look up and remap from the three normalCoord calculated in vertex shader
+		// look up and remap (to [-1,-1]) from the three normalCoord calculated in vertex shader
 		vec3 n0			= texture(wave_ripple_texture, fs_in.normalCoord0).rgb*2 -1; 
 		vec3 n1			= texture(wave_ripple_texture, fs_in.normalCoord1).rgb*2 -1; 
 		vec3 n2			= texture(wave_ripple_texture, fs_in.normalCoord2).rgb*2 -1; 
@@ -90,8 +89,6 @@ void main()
 	float facing		= 1 - max(dot(V, n), 0.0);			// compute facing component
 
 	// Output pixel color
-	frag_color = mix(color_deep, color_shallow, facing);
-	// Output with the added relection below does not work correctly 
-	//frag_color = mix(color_deep, color_shallow, facing) + vec4(R,1.0);
+	frag_color = mix(color_deep, color_shallow, facing) +  reflection;
 
 }
