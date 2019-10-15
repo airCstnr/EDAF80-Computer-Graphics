@@ -63,20 +63,30 @@ edaf80::Assignment4::run()
 											{ { ShaderType::vertex, "EDAF80/water.vert" },
 											{ ShaderType::fragment, "EDAF80/water.frag" } },
 											water_shader);
-	if (water_shader == 0u) {
+	if (water_shader == 0u)
 		LogError("Failed to load water shader");
+
+	// Create and load the skybox shader
+	GLuint skybox_shader = 0u;
+	program_manager.CreateAndRegisterProgram( "Sky Box",
+											 { { ShaderType::vertex, "EDAF80/skybox.vert" },
+											   { ShaderType::fragment, "EDAF80/skybox.frag" } },
+											 skybox_shader );
+	if(skybox_shader == 0u)
+		LogError( "Failed to load texcoord shader" );
+
+
+	// Load the quad shape for water geometry
+	auto const water_shape = parametric_shapes::createQuadTess(200u, 200u, 100u);
+	if (water_shape.vao == 0u) {
+		LogError("Failed to retrieve the shape mesh");
 		return;
 	}
 
-	//
-	// Load the geometry
-	//
-
-	//Load the quad shape
-	//auto const shape = parametric_shapes::createQuad(1u, 1u);
-	auto const shape = parametric_shapes::createQuadTess(2000u, 2000u, 500u);
-	if (shape.vao == 0u) {
-		LogError("Failed to retrieve the shape mesh");
+	// Load the sphere shape for sky box
+	auto const sky_shape = parametric_shapes::createSphere( 24, 20, 200 );
+	if(sky_shape.vao == 0u) {
+		LogError( "Failed to retrieve the shape mesh" );
 		return;
 	}
 
@@ -90,24 +100,29 @@ edaf80::Assignment4::run()
 		glUniform1f(glGetUniformLocation(program, "time" ), time );
 	};
 
-	// Set up node for the selected geometry
-	auto geometry_node = Node();
-	geometry_node.set_geometry(shape);
-	geometry_node.set_program(&water_shader, set_uniforms);
+	// Set up node for water
+	auto water_node = Node();
+	water_node.set_geometry(water_shape);
+	water_node.set_program(&water_shader, set_uniforms);
+
+	// Set up node for skybox
+	auto sky_node = Node();
+	sky_node.set_geometry( sky_shape );
+	sky_node.set_program( &skybox_shader, set_uniforms );
 
 	
 	// Cloudy hills cubemap set
-	auto cube_map = bonobo::loadTextureCubeMap(	"cloudyhills/posx.png", "cloudyhills/negx.png",
+	auto sky_map = bonobo::loadTextureCubeMap(	"cloudyhills/posx.png", "cloudyhills/negx.png",
 												"cloudyhills/posy.png", "cloudyhills/negy.png",
 												"cloudyhills/posz.png", "cloudyhills/negz.png",
 												true);
 
 	// Add cube map to current node
-	geometry_node.add_texture("cube_map", cube_map, GL_TEXTURE_CUBE_MAP);
+	sky_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
 
 	// For wave ripples
 	GLuint const wave_ripple_texture = bonobo::loadTexture2D("waves.png");
-	geometry_node.add_texture("wave_ripple_texture", wave_ripple_texture, GL_TEXTURE_2D);
+	water_node.add_texture("wave_ripple_texture", wave_ripple_texture, GL_TEXTURE_2D);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -123,9 +138,9 @@ edaf80::Assignment4::run()
 	double fpsNextTick = lastTime + 1000.0;
 
 	std::int32_t fallback_program_index = 0;
-	auto polygon_mode = bonobo::polygon_mode_t::line;
+	auto polygon_mode = bonobo::polygon_mode_t::fill;
 	bool show_logs = false;
-	bool show_gui = true;
+	bool show_gui = false;
 	bool shader_reload_failed = false;
 
 	while (!glfwWindowShouldClose(window)) {
@@ -179,11 +194,10 @@ edaf80::Assignment4::run()
 
 		if (!shader_reload_failed) {
 			//
-			// Todo: Render all your geometry here.
+			// Render all geometry
 			//
-
-
-			geometry_node.render(mCamera.GetWorldToClipMatrix());
+			water_node.render(mCamera.GetWorldToClipMatrix());
+			sky_node.render( mCamera.GetWorldToClipMatrix() );
 		}
 
 
@@ -195,10 +209,10 @@ edaf80::Assignment4::run()
 		bool opened = ImGui::Begin( "Scene Control", &opened, ImVec2( 300, 100 ), -1.0f, 0 );
 		if(opened) {
 			bonobo::uiSelectPolygonMode( "Polygon mode", polygon_mode );
-			auto geometry_node_selection_result = program_manager.SelectProgram( "Fallback", fallback_program_index );
+			/*auto geometry_node_selection_result = program_manager.SelectProgram( "Fallback", fallback_program_index );
 			if(geometry_node_selection_result.was_selection_changed) {
 				geometry_node.set_program( geometry_node_selection_result.program, set_uniforms );
-			}
+			}*/
 		}
 		ImGui::End();
 
