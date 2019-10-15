@@ -84,7 +84,7 @@ edaf80::Assignment4::run()
 	}
 
 	// Load the sphere shape for sky box
-	auto const sky_shape = parametric_shapes::createSphere( 24, 20, 200 );
+	auto const sky_shape = parametric_shapes::createSphere( 24, 20, 100 );
 	if(sky_shape.vao == 0u) {
 		LogError( "Failed to retrieve the shape mesh" );
 		return;
@@ -123,6 +123,9 @@ edaf80::Assignment4::run()
 	// For wave ripples
 	GLuint const wave_ripple_texture = bonobo::loadTexture2D("waves.png");
 	water_node.add_texture("wave_ripple_texture", wave_ripple_texture, GL_TEXTURE_2D);
+
+	// Translate waves to set them at the center of the skybox
+	water_node.get_transform().SetTranslate( glm::vec3(-100, 0, -100) );
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -209,10 +212,6 @@ edaf80::Assignment4::run()
 		bool opened = ImGui::Begin( "Scene Control", &opened, ImVec2( 300, 100 ), -1.0f, 0 );
 		if(opened) {
 			bonobo::uiSelectPolygonMode( "Polygon mode", polygon_mode );
-			/*auto geometry_node_selection_result = program_manager.SelectProgram( "Fallback", fallback_program_index );
-			if(geometry_node_selection_result.was_selection_changed) {
-				geometry_node.set_program( geometry_node_selection_result.program, set_uniforms );
-			}*/
 		}
 		ImGui::End();
 
