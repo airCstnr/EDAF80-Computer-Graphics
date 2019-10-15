@@ -24,6 +24,9 @@ out VS_OUT {
 	float xder;
 	float zder;
 	vec2 texcoord;
+	vec2 normalCoord0;
+	vec2 normalCoord1;
+	vec2 normalCoord2;
 	vec3 vertex;
 	vec3 normal;
 } vs_out;
@@ -95,12 +98,25 @@ void main()
 	float xder1 = wave_der_x(vert.x, vert.z, time, 1);
 	float zder1 = wave_der_z(vert.x, vert.z, time, 1);
 
+
+	// Animated Normal mapping: coordinates
+	// Read three times from the normal map
+	// All points in the same direction
+	// Here the three coordinates are calculated
+	vec2 texScale		= vec2(8,4);
+	float normalTime	= mod(time, 100.0);
+	vec2 normalSpeed	= vec2(-0.05, 0);
+
+	vs_out.normalCoord0 = vec2(texcoord.xy*texScale + normalTime*normalSpeed);
+	vs_out.normalCoord1 = vec2(texcoord.xy*texScale*2 + normalTime*normalSpeed*4);
+	vs_out.normalCoord2 = vec2(texcoord.xy*texScale*4 + normalTime*normalSpeed*8);
+
 	// Set outputs from water vertex shader
-	vs_out.xder = xder0 + xder1;
-	vs_out.zder = zder0 + zder1;
-	vs_out.vertex = vec3(vertex_model_to_world * vec4(vert, 1.0));
-	vs_out.normal = vec3(normal_model_to_world * vec4(normal, 0.0));
-	vs_out.texcoord		= texcoord.xy; 	
+	vs_out.xder		= xder0 + xder1;
+	vs_out.zder		= zder0 + zder1;
+	vs_out.vertex	= vec3(vertex_model_to_world * vec4(vert, 1.0));
+	vs_out.normal	= vec3(normal_model_to_world * vec4(normal, 0.0));
+	vs_out.texcoord	= texcoord.xy; 	
 
 	gl_Position = vertex_world_to_clip * vertex_model_to_world * vec4(vert, 1.0);
 }

@@ -16,13 +16,22 @@ uniform mat4 vertex_world_to_clip;
 // Uniform vectors
 uniform vec3 camera_position;	// defined in world space
 
+// Uniform floats
+uniform float time;	// current time elapsed
+
 // Uniform samplerCubes
 uniform samplerCube cube_map;
+
+// Uniform sampler2D
+uniform sampler2D wave_ripple_texture;
 
 in VS_OUT {
 	float xder;
 	float zder;
 	vec2 texcoord;
+	vec2 normalCoord0;
+	vec2 normalCoord1;
+	vec2 normalCoord2;
 	vec3 vertex;				// from RAST/VS
 	vec3 normal;				// from RAST/VS
 } fs_in;
@@ -59,7 +68,22 @@ void main()
 
 		// Compute reflection term
 		vec3 R = normalize(reflect(-V, N));					// Formula from slides 
-	
+
+	// Animated Normal mapping
+
+		// look up and remap from the three normalCoord calculated in vertex shader
+		vec3 n0			= texture(wave_ripple_texture, fs_in.normalCoord0).rgb*2 -1; 
+		vec3 n1			= texture(wave_ripple_texture, fs_in.normalCoord1).rgb*2 -1; 
+		vec3 n2			= texture(wave_ripple_texture, fs_in.normalCoord2).rgb*2 -1; 
+
+		// Superposition
+		vec3 n_ripple	= normalize(n0 + n1 + n2); // looked up normals are in tangent space
+
+		// transform to world space
+		n_ripple		= TBN * n_ripple;
+
+		// TODO n_ripple needs to be added to the pixel color computation
+
 	//Water color 
 	vec4 color_deep		= vec4(0.0, 0.0, 0.1, 1.0);			// deep color
 	vec4 color_shallow	= vec4(0.0, 0.5, 0.5, 1.0);			// shallow color

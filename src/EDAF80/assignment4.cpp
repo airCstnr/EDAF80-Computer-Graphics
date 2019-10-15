@@ -95,7 +95,7 @@ edaf80::Assignment4::run()
 	geometry_node.set_geometry(shape);
 	geometry_node.set_program(&water_shader, set_uniforms);
 
-
+	
 	// Cloudy hills cubemap set
 	auto cube_map = bonobo::loadTextureCubeMap(	"cloudyhills/posx.png", "cloudyhills/negx.png",
 												"cloudyhills/posy.png", "cloudyhills/negy.png",
