@@ -13,6 +13,11 @@
 
 #include <stdexcept>
 
+// New
+#include "parametric_shapes.hpp"
+#include "core/node.hpp"
+#include <glm/gtc/type_ptr.hpp>
+
 edaf80::Assignment5::Assignment5(WindowManager& windowManager) :
 	mCamera(0.5f * glm::half_pi<float>(),
 	        static_cast<float>(config::resolution_x) / static_cast<float>(config::resolution_y),
@@ -35,8 +40,10 @@ edaf80::Assignment5::run()
 	mCamera.mMouseSensitivity = 0.003f;
 	mCamera.mMovementSpeed = 0.025;
 
-	// Create the shader programs
+	/* --------------------------------- Create the shader programs ---------------------------------------*/
 	ShaderProgramManager program_manager;
+
+	// Create and load the fallback shader
 	GLuint fallback_shader = 0u;
 	program_manager.CreateAndRegisterProgram("Fallback",
 	                                         { { ShaderType::vertex, "EDAF80/fallback.vert" },
@@ -47,14 +54,81 @@ edaf80::Assignment5::run()
 		return;
 	}
 
-	//
-	// Todo: Insert the creation of other shader programs.
-	//       (Check how it was done in assignment 3.)
-	//
+	// Create and load the water shader
+	GLuint water_shader = 0u;
+	program_manager.CreateAndRegisterProgram("Water",
+											{ { ShaderType::vertex, "EDAF80/water.vert" },
+											{ ShaderType::fragment, "EDAF80/water.frag" } },
+											water_shader);
+	if (water_shader == 0u)
+		LogError("Failed to load water shader");
 
-	//
-	// Todo: Load your geometry
-	//
+	// Create and load the skybox shader
+	GLuint skybox_shader = 0u;
+	program_manager.CreateAndRegisterProgram("Sky Box",
+											{ { ShaderType::vertex, "EDAF80/skybox.vert" },
+											{ ShaderType::fragment, "EDAF80/skybox.frag" } },
+											skybox_shader);
+	if (skybox_shader == 0u)
+		LogError("Failed to load skybox shader");
+
+	/* --------------------------------- Load  geometry ---------------------------------------*/
+
+	// Load the quad shape for water geometry
+	auto const water_shape = parametric_shapes::createQuadTess(200u, 200u, 100u);
+	if (water_shape.vao == 0u) {
+		LogError("Failed to retrieve the shape mesh");
+		return;
+	}
+
+	// Load the sphere shape for sky box
+	auto const sky_shape = parametric_shapes::createSphere(24, 20, 100);
+	if (sky_shape.vao == 0u) {
+		LogError("Failed to retrieve the shape mesh");
+		return;
+	}
+
+	/* --------------------------------- Set up uniforms ---------------------------------------*/
+
+	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
+	auto camera_position = mCamera.mWorld.GetTranslation();
+	auto time = 0.0f;
+	auto const set_uniforms = [&light_position, &camera_position, &time](GLuint program) {
+		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
+		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
+		glUniform1f(glGetUniformLocation(program, "time"), time);
+	};
+
+	/* --------------------------------- Set up nodes ---------------------------------------*/
+
+	// Set up node for water
+	auto water_node = Node();
+	water_node.set_geometry(water_shape);
+	water_node.set_program(&water_shader, set_uniforms);
+
+	// Translate waves to set them at the center of the skybox
+	water_node.get_transform().SetTranslate(glm::vec3(-100, 0, -100));
+
+	// Set up node for skybox
+	auto sky_node = Node();
+	sky_node.set_geometry(sky_shape);
+	sky_node.set_program(&skybox_shader, set_uniforms);
+
+	/* --------------------------------- Load textures ---------------------------------------*/
+
+	// Cloudy hills cubemap set
+	auto sky_map = bonobo::loadTextureCubeMap("cloudyhills/posx.png", "cloudyhills/negx.png",
+		"cloudyhills/posy.png", "cloudyhills/negy.png",
+		"cloudyhills/posz.png", "cloudyhills/negz.png",
+		true);
+
+	// Add cube map to current node
+	sky_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
+	water_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
+
+	// For wave ripples
+	GLuint const wave_ripple_texture = bonobo::loadTexture2D("waves.png");
+	water_node.add_texture("wave_ripple_texture", wave_ripple_texture, GL_TEXTURE_2D);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -72,6 +146,8 @@ edaf80::Assignment5::run()
 	bool show_logs = true;
 	bool show_gui = true;
 	bool shader_reload_failed = false;
+
+	/* --------------------------------- Render loop ---------------------------------------*/
 
 	while (!glfwWindowShouldClose(window)) {
 		nowTime = GetTimeMilliseconds();
@@ -120,6 +196,9 @@ edaf80::Assignment5::run()
 			//
 			// Todo: Render all your geometry here.
 			//
+
+			water_node.render(mCamera.GetWorldToClipMatrix());
+			sky_node.render(mCamera.GetWorldToClipMatrix());
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
