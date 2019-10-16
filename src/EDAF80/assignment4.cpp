@@ -119,6 +119,7 @@ edaf80::Assignment4::run()
 
 	// Add cube map to current node
 	sky_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
+	water_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
 
 	// For wave ripples
 	GLuint const wave_ripple_texture = bonobo::loadTexture2D("waves.png");
@@ -155,7 +156,7 @@ edaf80::Assignment4::run()
 		}
 		fpsSamples++;
 
-		time += 0.1;
+		time += 0.01;
 
 		auto& io = ImGui::GetIO();
 		inputHandler.SetUICapture(io.WantCaptureMouse, io.WantCaptureKeyboard);
@@ -163,6 +164,7 @@ edaf80::Assignment4::run()
 		glfwPollEvents();
 		inputHandler.Advance();
 		mCamera.Update(ddeltatime, inputHandler);
+		camera_position = mCamera.mWorld.GetTranslation();
 
 		if (inputHandler.GetKeycodeState(GLFW_KEY_F3) & JUST_RELEASED)
 			show_logs = !show_logs;
