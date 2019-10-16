@@ -44,11 +44,31 @@ edaf80::Assignment5::run()
 	ShaderProgramManager program_manager;
 
 	// Create and load the fallback shader
+	GLuint texcoord_shader = 0u;
+	program_manager.CreateAndRegisterProgram("Fallback",
+	                                         { { ShaderType::vertex, "EDAF80/texcoord.vert" },
+	                                           { ShaderType::fragment, "EDAF80/texcoord.frag" } },
+											texcoord_shader);
+	if (texcoord_shader == 0u) {
+		LogError("Failed to load texcoord shader");
+		return;
+	}
+
+	// Add texture shader, using Celestial Ring shagers from assignment 1
+	GLuint texture_shader = 0u;
+	program_manager.CreateAndRegisterProgram("Texture mapping",
+		{ { ShaderType::vertex, "EDAF80/celestial_ring.vert" },
+		{ ShaderType::fragment, "EDAF80/celestial_ring.frag" } },
+		texture_shader);
+	if (texture_shader == 0u)
+		LogError("Failed to generate the “Celestial Ring” shader program: exiting.");
+
+	// Create and load the fallback shader
 	GLuint fallback_shader = 0u;
 	program_manager.CreateAndRegisterProgram("Fallback",
-	                                         { { ShaderType::vertex, "EDAF80/fallback.vert" },
-	                                           { ShaderType::fragment, "EDAF80/fallback.frag" } },
-	                                         fallback_shader);
+		{ { ShaderType::vertex, "EDAF80/fallback.vert" },
+		  { ShaderType::fragment, "EDAF80/fallback.frag" } },
+		fallback_shader);
 	if (fallback_shader == 0u) {
 		LogError("Failed to load fallback shader");
 		return;
@@ -82,11 +102,22 @@ edaf80::Assignment5::run()
 	}
 
 	// Load the sphere shape for sky box
-	auto const sky_shape = parametric_shapes::createSphere(24, 20, 100);
+	auto const sky_shape = parametric_shapes::createSphere(24, 20, 500);
 	if (sky_shape.vao == 0u) {
 		LogError("Failed to retrieve the shape mesh");
 		return;
 	}
+
+
+	/* --------------------------------- Load  models  ---------------------------------------*/
+	// Load Dory 
+	std::vector<bonobo::mesh_data> const objects = bonobo::loadObjects("dory.obj");
+	if (objects.empty()) {
+		LogError("Failed to load the nemo model");
+
+		return;
+	}
+	bonobo::mesh_data const& nemo = objects.front();
 
 	/* --------------------------------- Set up uniforms ---------------------------------------*/
 
@@ -114,6 +145,11 @@ edaf80::Assignment5::run()
 	sky_node.set_geometry(sky_shape);
 	sky_node.set_program(&skybox_shader, set_uniforms);
 
+	// Set up node for loaded
+	auto nemo_node = Node();
+	nemo_node.set_geometry(nemo);
+	nemo_node.set_program(&texture_shader, set_uniforms);
+
 	/* --------------------------------- Load textures ---------------------------------------*/
 
 	// Cloudy hills cubemap set
@@ -129,6 +165,10 @@ edaf80::Assignment5::run()
 	// For wave ripples
 	GLuint const wave_ripple_texture = bonobo::loadTexture2D("waves.png");
 	water_node.add_texture("wave_ripple_texture", wave_ripple_texture, GL_TEXTURE_2D);
+
+	// For wave ripples
+	GLuint const dory_texture = bonobo::loadTexture2D("dory_texture.jpg");
+	nemo_node.add_texture("dory_texture", dory_texture, GL_TEXTURE_2D);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -199,6 +239,7 @@ edaf80::Assignment5::run()
 
 			water_node.render(mCamera.GetWorldToClipMatrix());
 			sky_node.render(mCamera.GetWorldToClipMatrix());
+			nemo_node.render(mCamera.GetWorldToClipMatrix());
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
