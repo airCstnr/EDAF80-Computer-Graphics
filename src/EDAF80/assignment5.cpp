@@ -172,7 +172,6 @@ edaf80::Assignment5::run()
 	auto water_node = Node();
 	water_node.set_geometry(water_shape);
 	water_node.set_program(&water_shader, set_uniforms);
-
 	// Translate waves to set them at the center of the skybox
 	water_node.get_transform().SetTranslate(glm::vec3(-100, 0, -100));
 
@@ -185,10 +184,8 @@ edaf80::Assignment5::run()
 	auto dory_node = Node();
 	dory_node.set_geometry(dory);
 	dory_node.set_program(&dory_shader, set_uniforms);
-
 	// Translate dory to set her in front of me
 	dory_node.get_transform().SetTranslate( glm::vec3( 0, -15, -20 ) );
-
 	// dory has to look in the same direction than me
 	dory_node.get_transform().RotateX( glm::half_pi<float>() );
 	dory_node.get_transform().RotateZ( glm::pi<float>() );
@@ -197,10 +194,8 @@ edaf80::Assignment5::run()
 	auto mine_node = Node();
 	mine_node.set_geometry( mine );
 	mine_node.set_program( &phong_shader, phong_set_uniforms );
-
 	mine_node.get_transform().SetScale( 0.1 );
-
-	mine_node.get_transform().SetTranslate( glm::vec3( 0, -15, -20 ) );
+	mine_node.get_transform().SetTranslate( glm::vec3( 20, -15, -20 ) );
 
 
 	/* --------------------------------- Load textures ---------------------------------------*/
@@ -223,6 +218,10 @@ edaf80::Assignment5::run()
 	GLuint const dory_texture = bonobo::loadTexture2D("dory_texture.jpg");
 	dory_node.add_texture("dory_texture", dory_texture, GL_TEXTURE_2D);
 
+
+	/* --------------------------------- Motion management ---------------------------------------*/
+	bool enable_dory_motion = true;
+
 	glEnable(GL_DEPTH_TEST);
 
 	// Enable face culling to improve performance:
@@ -230,17 +229,21 @@ edaf80::Assignment5::run()
 	//glCullFace(GL_FRONT);
 	//glCullFace(GL_BACK);
 
+	/* --------------------------------- Time management ---------------------------------------*/
 
 	f64 ddeltatime;
 	size_t fpsSamples = 0;
 	double nowTime, lastTime = GetTimeMilliseconds();
 	double fpsNextTick = lastTime + 1000.0;
 
+	/* --------------------------------- Log Windows Parameters ---------------------------------------*/
+
 	bool show_logs = false;
 	bool show_gui = false;
 	bool shader_reload_failed = false;
 
 	auto polygon_mode = bonobo::polygon_mode_t::fill;
+
 
 	/* --------------------------------- Render loop ---------------------------------------*/
 
@@ -302,7 +305,7 @@ edaf80::Assignment5::run()
 			//
 			water_node.render(mCamera.GetWorldToClipMatrix());
 			sky_node.render(mCamera.GetWorldToClipMatrix());
-			//dory_node.render(mCamera.GetWorldToClipMatrix());
+			dory_node.render(mCamera.GetWorldToClipMatrix());
 			mine_node.render( mCamera.GetWorldToClipMatrix() );
 		}
 
