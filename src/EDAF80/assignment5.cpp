@@ -98,6 +98,16 @@ edaf80::Assignment5::run()
 		return;
 	}
 
+	GLuint phong_shader = 0u;
+	program_manager.CreateAndRegisterProgram( "Phong shader",
+											{ { ShaderType::vertex, "EDAF80/phong.vert" },
+												{ ShaderType::fragment, "EDAF80/phong.frag" } },
+											phong_shader );
+	if(phong_shader == 0u) {
+		LogError( "Failed to load phong shader" );
+		return;
+	}
+
 	/* --------------------------------- Load  geometry ---------------------------------------*/
 
 	// Load the quad shape for water geometry
@@ -117,13 +127,20 @@ edaf80::Assignment5::run()
 
 	/* --------------------------------- Load  models  ---------------------------------------*/
 	// Load Dory
-	std::vector<bonobo::mesh_data> const objects = bonobo::loadObjects("dory.obj");
-	if (objects.empty()) {
+	std::vector<bonobo::mesh_data> const dory_object = bonobo::loadObjects("dory.obj");
+	if (dory_object.empty()) {
 		LogError("Failed to load the dory model");
-
 		return;
 	}
-	bonobo::mesh_data const& dory = objects.front();
+	bonobo::mesh_data const& dory = dory_object.front();
+
+	// Load mine
+	std::vector<bonobo::mesh_data> const mine_object = bonobo::loadObjects( "mine.obj" );
+	if(mine_object.empty()) {
+		LogError( "Failed to load the mine model" );
+		return;
+	}
+	bonobo::mesh_data const& mine = mine_object.front();
 
 	/* --------------------------------- Set up uniforms ---------------------------------------*/
 
@@ -134,6 +151,19 @@ edaf80::Assignment5::run()
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
 		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
 		glUniform1f(glGetUniformLocation(program, "time"), time);
+	};
+
+	auto ambient = glm::vec3( 0.2f, 0.2f, 0.2f );
+	auto diffuse = glm::vec3( 0.1f, 0.1f, 0.4f );
+	auto specular = glm::vec3( 1.0f, 1.0f, 1.0f );
+	auto shininess = 1.0f;
+	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess]( GLuint program ) {
+		glUniform3fv( glGetUniformLocation( program, "light_position" ), 1, glm::value_ptr( light_position ) );
+		glUniform3fv( glGetUniformLocation( program, "camera_position" ), 1, glm::value_ptr( camera_position ) );
+		glUniform3fv( glGetUniformLocation( program, "ambient" ), 1, glm::value_ptr( ambient ) );
+		glUniform3fv( glGetUniformLocation( program, "diffuse" ), 1, glm::value_ptr( diffuse ) );
+		glUniform3fv( glGetUniformLocation( program, "specular" ), 1, glm::value_ptr( specular ) );
+		glUniform1f( glGetUniformLocation( program, "shininess" ), shininess );
 	};
 
 	/* --------------------------------- Set up nodes ---------------------------------------*/
@@ -163,6 +193,15 @@ edaf80::Assignment5::run()
 	dory_node.get_transform().RotateX( glm::half_pi<float>() );
 	dory_node.get_transform().RotateZ( glm::pi<float>() );
 
+	// Set up node for mine
+	auto mine_node = Node();
+	mine_node.set_geometry( mine );
+	mine_node.set_program( &phong_shader, phong_set_uniforms );
+
+	mine_node.get_transform().SetScale( 0.1 );
+
+	mine_node.get_transform().SetTranslate( glm::vec3( 0, -15, -20 ) );
+
 
 	/* --------------------------------- Load textures ---------------------------------------*/
 
@@ -180,7 +219,7 @@ edaf80::Assignment5::run()
 	GLuint const wave_ripple_texture = bonobo::loadTexture2D("waves.png");
 	water_node.add_texture("wave_ripple_texture", wave_ripple_texture, GL_TEXTURE_2D);
 
-	// For wave ripples
+	// Load dory texture
 	GLuint const dory_texture = bonobo::loadTexture2D("dory_texture.jpg");
 	dory_node.add_texture("dory_texture", dory_texture, GL_TEXTURE_2D);
 
@@ -263,7 +302,8 @@ edaf80::Assignment5::run()
 			//
 			water_node.render(mCamera.GetWorldToClipMatrix());
 			sky_node.render(mCamera.GetWorldToClipMatrix());
-			dory_node.render(mCamera.GetWorldToClipMatrix());
+			//dory_node.render(mCamera.GetWorldToClipMatrix());
+			mine_node.render( mCamera.GetWorldToClipMatrix() );
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

@@ -23,10 +23,9 @@ Don't loose Dory or  hurt rocks, otherwise you will not find your way.
 ### TODO
 
 1. Add Nemo model
-2. Add Dory Model
-3. Add camera movement, following Nemo
+3. Add camera movement, following Nemo/Dory
 4. Add Dory movement, along randomized path (maybe catmull-rom path)
-5. Add rocks
+5. Add rocks / obstacles
 6. Add other fishes
 7. Add hitboxes
 8. Add water physics (inertia...)
