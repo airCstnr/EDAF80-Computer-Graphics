@@ -222,6 +222,27 @@ edaf80::Assignment5::run()
 	/* --------------------------------- Motion management ---------------------------------------*/
 	bool enable_dory_motion = true;
 
+	// Create random path
+	size_t dory_path_length = 5; // number of points in the path
+	float dory_path_keypoints; // random y value for the path generation
+	std::vector<glm::vec3> dory_path_vector;
+
+	for(size_t i = 0; i < dory_path_length; i++) {
+		dory_path_keypoints = ((float( rand() ) / float( RAND_MAX )) * 2) - 1; // generate random number between -1 and 1
+		dory_path_vector.push_back( glm::vec3( 0, dory_path_keypoints, static_cast<float>(i) ) );
+	}
+
+	float dory_path_pos = 0.0f;
+	float dory_velocity = 0.05f;
+	int dory_current_point_index = 0;
+	int dory_next_point_index = 0;
+	int dory_next2_point_index = 0;
+	int dory_previous_point_index = 0;
+	float dory_distance_ratio = 0;
+
+
+	/* --------------------------------- GL Parameters ---------------------------------------*/
+
 	glEnable(GL_DEPTH_TEST);
 
 	// Enable face culling to improve performance:
