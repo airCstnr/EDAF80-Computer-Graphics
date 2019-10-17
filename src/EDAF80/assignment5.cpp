@@ -16,6 +16,7 @@
 #include "parametric_shapes.hpp"
 #include "core/node.hpp"
 #include <glm/gtc/type_ptr.hpp>
+#include "interpolation.hpp"
 
 edaf80::Assignment5::Assignment5(WindowManager& windowManager) :
 	mCamera(0.5f * glm::half_pi<float>(),
@@ -221,19 +222,22 @@ edaf80::Assignment5::run()
 
 	/* --------------------------------- Motion management ---------------------------------------*/
 	bool enable_dory_motion = true;
+	float catmull_rom_tension = 0.5f;
 
 	// Create random path
 	size_t dory_path_length = 5; // number of points in the path
-	float dory_path_keypoints; // random y value for the path generation
+	float dory_path_keypoint; // random y value for the path generation
 	std::vector<glm::vec3> dory_path_vector;
 
+
 	for(size_t i = 0; i < dory_path_length; i++) {
-		dory_path_keypoints = ((float( rand() ) / float( RAND_MAX )) * 2) - 1; // generate random number between -1 and 1
-		dory_path_vector.push_back( glm::vec3( 0, dory_path_keypoints, static_cast<float>(i) ) );
+		dory_path_keypoint = ((float( rand() ) / float( RAND_MAX )) * 2) - 1; // generate random number between -1 and 1
+		dory_path_vector.push_back( glm::vec3( dory_path_keypoint, 0, -static_cast<float>(i) ) );
 	}
 
+	glm::vec3 dory_initial_position = dory_node.get_transform().GetTranslation(); // store initial position
 	float dory_path_pos = 0.0f;
-	float dory_velocity = 0.05f;
+	float dory_velocity = 0.005f;
 	int dory_current_point_index = 0;
 	int dory_next_point_index = 0;
 	int dory_next2_point_index = 0;
@@ -312,8 +316,52 @@ edaf80::Assignment5::run()
 
 		// Move Dory
 		if(enable_dory_motion) {
-			// do something
-			//std::cerr << "Dory motion" << std::endl;
+
+			// TODO : use modulo instead of this ugly if statements
+			// TODO : create function to compute this path instead of pulluting main function
+
+			dory_current_point_index = floor( dory_path_pos );
+			dory_next_point_index = dory_current_point_index + 1;
+			dory_next2_point_index = dory_current_point_index + 2;
+			dory_previous_point_index = dory_current_point_index - 1;
+			dory_distance_ratio = dory_path_pos - dory_current_point_index;
+
+			// manage path circularity
+			if(dory_current_point_index == dory_path_vector.size() - 2)
+			{
+				dory_next2_point_index = 0;
+			}
+			if(dory_current_point_index == dory_path_vector.size() - 1)
+			{
+				dory_next_point_index = 0;
+				dory_next2_point_index = 1;
+			}
+			if(dory_current_point_index == dory_path_vector.size())
+			{
+				dory_current_point_index = 0;
+				dory_next_point_index = 1;
+				dory_next2_point_index = 2;
+				dory_path_pos = 0;
+			}
+			if(dory_current_point_index == 0)
+			{
+				// initialize dory position after path loop
+				dory_node.get_transform().SetTranslate( dory_initial_position );
+
+				dory_previous_point_index = dory_path_vector.size() - 1;
+			}
+
+			// compute linear translation 
+			glm::vec3 q_step = interpolation::evalCatmullRom(   dory_path_vector[dory_previous_point_index],
+																dory_path_vector[dory_current_point_index],
+																dory_path_vector[dory_next_point_index],
+																dory_path_vector[dory_next2_point_index],
+																catmull_rom_tension,
+																dory_distance_ratio );
+
+			// translate dory along the interpolated path
+			dory_node.get_transform().Translate( q_step );
+			dory_path_pos += dory_velocity;
 		}
 
 		int framebuffer_width, framebuffer_height;

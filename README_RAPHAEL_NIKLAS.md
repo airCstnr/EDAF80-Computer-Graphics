@@ -23,10 +23,14 @@ Don't loose Dory or  hurt rocks, otherwise you will not find your way.
 ### TODO
 
 1. Add Nemo model
-3. Add camera movement, following Nemo/Dory
+3. Add camera movement, following Nemo/Dory/User commands
 4. Add Dory movement, along randomized path (maybe catmull-rom path)
+    TODO : make function from code in main function
+    TODO : improve this code
 5. Add rocks / obstacles
-6. Add other fishes
-7. Add hitboxes
+    TODO : add randomized/generated postion mines into water environment
+    TODO : optimize generation to avoid generating objects where Dory is not supposed to go...
+6. Add other fishes?
+7. Add hitboxes to mines
 8. Add water physics (inertia...)
-9. Add particles effects
+9. Add particles effects...
