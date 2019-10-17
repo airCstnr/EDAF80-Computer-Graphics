@@ -303,13 +303,18 @@ edaf80::Assignment5::run()
 			// Switch between polygon modes
 			polygon_mode = static_cast<bonobo::polygon_mode_t>((static_cast<int>(polygon_mode) + 1) % 3);
 		}
+		if(inputHandler.GetKeycodeState( GLFW_KEY_M ) & JUST_PRESSED) {
+			// Enable/Disable Dory Motion
+			enable_dory_motion = !enable_dory_motion;
+		}
 
 		ImGui_ImplGlfwGL3_NewFrame();
 
-		//
-		// Todo: If you need to handle inputs, you can do it here
-		//
-
+		// Move Dory
+		if(enable_dory_motion) {
+			// do something
+			//std::cerr << "Dory motion" << std::endl;
+		}
 
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
