@@ -13,7 +13,6 @@
 
 #include <stdexcept>
 
-// New
 #include "parametric_shapes.hpp"
 #include "core/node.hpp"
 #include <glm/gtc/type_ptr.hpp>
@@ -36,16 +35,17 @@ void
 edaf80::Assignment5::run()
 {
 	// Set up the camera
-	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, 0.0f, 6.0f));
+	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, -10.0f, 0.0f)); // set start position underwater
 	mCamera.mMouseSensitivity = 0.003f;
 	mCamera.mMovementSpeed = 0.025;
 
 	/* --------------------------------- Create the shader programs ---------------------------------------*/
+	// Set program manager
 	ShaderProgramManager program_manager;
 
 	// Create and load the fallback shader
 	GLuint texcoord_shader = 0u;
-	program_manager.CreateAndRegisterProgram("Fallback",
+	program_manager.CreateAndRegisterProgram("Texture coords",
 	                                         { { ShaderType::vertex, "EDAF80/texcoord.vert" },
 	                                           { ShaderType::fragment, "EDAF80/texcoord.frag" } },
 											texcoord_shader);
@@ -57,11 +57,13 @@ edaf80::Assignment5::run()
 	// Add texture shader, using Celestial Ring shagers from assignment 1
 	GLuint texture_shader = 0u;
 	program_manager.CreateAndRegisterProgram("Texture mapping",
-		{ { ShaderType::vertex, "EDAF80/celestial_ring.vert" },
-		{ ShaderType::fragment, "EDAF80/celestial_ring.frag" } },
-		texture_shader);
-	if (texture_shader == 0u)
-		LogError("Failed to generate the “Celestial Ring” shader program: exiting.");
+												{ { ShaderType::vertex, "EDAF80/celestial_ring.vert" },
+												{ ShaderType::fragment, "EDAF80/celestial_ring.frag" } },
+												texture_shader);
+	if (texture_shader == 0u) {
+		LogError("Failed to load Celestial Ring shader");
+		return;
+	}
 
 	// Create and load the fallback shader
 	GLuint fallback_shader = 0u;
@@ -80,8 +82,10 @@ edaf80::Assignment5::run()
 											{ { ShaderType::vertex, "EDAF80/water.vert" },
 											{ ShaderType::fragment, "EDAF80/water.frag" } },
 											water_shader);
-	if (water_shader == 0u)
+	if (water_shader == 0u) {
 		LogError("Failed to load water shader");
+		return;
+	}
 
 	// Create and load the skybox shader
 	GLuint skybox_shader = 0u;
@@ -89,8 +93,10 @@ edaf80::Assignment5::run()
 											{ { ShaderType::vertex, "EDAF80/skybox.vert" },
 											{ ShaderType::fragment, "EDAF80/skybox.frag" } },
 											skybox_shader);
-	if (skybox_shader == 0u)
+	if (skybox_shader == 0u) {
 		LogError("Failed to load skybox shader");
+		return;
+	}
 
 	/* --------------------------------- Load  geometry ---------------------------------------*/
 
@@ -110,14 +116,14 @@ edaf80::Assignment5::run()
 
 
 	/* --------------------------------- Load  models  ---------------------------------------*/
-	// Load Dory 
+	// Load Dory
 	std::vector<bonobo::mesh_data> const objects = bonobo::loadObjects("dory.obj");
 	if (objects.empty()) {
-		LogError("Failed to load the nemo model");
+		LogError("Failed to load the dory model");
 
 		return;
 	}
-	bonobo::mesh_data const& nemo = objects.front();
+	bonobo::mesh_data const& dory = objects.front();
 
 	/* --------------------------------- Set up uniforms ---------------------------------------*/
 
@@ -146,9 +152,9 @@ edaf80::Assignment5::run()
 	sky_node.set_program(&skybox_shader, set_uniforms);
 
 	// Set up node for loaded
-	auto nemo_node = Node();
-	nemo_node.set_geometry(nemo);
-	nemo_node.set_program(&texture_shader, set_uniforms);
+	auto dory_node = Node();
+	dory_node.set_geometry(dory);
+	dory_node.set_program(&texture_shader, set_uniforms);
 
 	/* --------------------------------- Load textures ---------------------------------------*/
 
@@ -168,7 +174,7 @@ edaf80::Assignment5::run()
 
 	// For wave ripples
 	GLuint const dory_texture = bonobo::loadTexture2D("dory_texture.jpg");
-	nemo_node.add_texture("dory_texture", dory_texture, GL_TEXTURE_2D);
+	dory_node.add_texture("dory_texture", dory_texture, GL_TEXTURE_2D);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -183,9 +189,11 @@ edaf80::Assignment5::run()
 	double nowTime, lastTime = GetTimeMilliseconds();
 	double fpsNextTick = lastTime + 1000.0;
 
-	bool show_logs = true;
+	bool show_logs = false;
 	bool show_gui = true;
 	bool shader_reload_failed = false;
+
+	auto polygon_mode = bonobo::polygon_mode_t::fill;
 
 	/* --------------------------------- Render loop ---------------------------------------*/
 
@@ -197,6 +205,9 @@ edaf80::Assignment5::run()
 			fpsSamples = 0;
 		}
 		fpsSamples++;
+
+		// Increment time for waves movement
+		time += 0.01;
 
 		auto& io = ImGui::GetIO();
 		inputHandler.SetUICapture(io.WantCaptureMouse, io.WantCaptureKeyboard);
@@ -217,6 +228,10 @@ edaf80::Assignment5::run()
 				                   "Rendering is suspended until the issue is solved. Once fixed, just reload the shaders again.",
 				                   "error");
 		}
+		if(inputHandler.GetKeycodeState( GLFW_KEY_P ) & JUST_PRESSED) {
+			// Switch between polygon modes
+			polygon_mode = static_cast<bonobo::polygon_mode_t>((static_cast<int>(polygon_mode) + 1) % 3);
+		}
 
 		ImGui_ImplGlfwGL3_NewFrame();
 
@@ -232,22 +247,27 @@ edaf80::Assignment5::run()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+		bonobo::changePolygonMode( polygon_mode );
+
 		if (!shader_reload_failed) {
 			//
-			// Todo: Render all your geometry here.
+			// Render all geometries
 			//
-
 			water_node.render(mCamera.GetWorldToClipMatrix());
 			sky_node.render(mCamera.GetWorldToClipMatrix());
-			nemo_node.render(mCamera.GetWorldToClipMatrix());
+			//dory_node.render(mCamera.GetWorldToClipMatrix());
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		//
-		// Todo: If you want a custom ImGUI window, you can set it up
-		//       here
+		// custom ImGUI window
 		//
+		bool opened = ImGui::Begin( "Scene Control", &opened, ImVec2( 300, 100 ), -1.0f, 0 );
+		if(opened) {
+			bonobo::uiSelectPolygonMode( "Polygon mode", polygon_mode );
+		}
+		ImGui::End();
 
 		if (show_logs)
 			Log::View::Render();
