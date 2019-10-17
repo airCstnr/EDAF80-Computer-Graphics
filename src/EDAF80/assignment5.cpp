@@ -55,12 +55,12 @@ edaf80::Assignment5::run()
 	}
 
 	// Add texture shader, using Celestial Ring shagers from assignment 1
-	GLuint texture_shader = 0u;
-	program_manager.CreateAndRegisterProgram("Texture mapping",
-												{ { ShaderType::vertex, "EDAF80/celestial_ring.vert" },
-												{ ShaderType::fragment, "EDAF80/celestial_ring.frag" } },
-												texture_shader);
-	if (texture_shader == 0u) {
+	GLuint dory_shader = 0u;
+	program_manager.CreateAndRegisterProgram("Dory texture mapping",
+												{ { ShaderType::vertex, "EDAF80/dory.vert" },
+												{ ShaderType::fragment, "EDAF80/dory.frag" } },
+												dory_shader);
+	if (dory_shader == 0u) {
 		LogError("Failed to load Celestial Ring shader");
 		return;
 	}
@@ -151,10 +151,18 @@ edaf80::Assignment5::run()
 	sky_node.set_geometry(sky_shape);
 	sky_node.set_program(&skybox_shader, set_uniforms);
 
-	// Set up node for loaded
+	// Set up node for dory
 	auto dory_node = Node();
 	dory_node.set_geometry(dory);
-	dory_node.set_program(&texture_shader, set_uniforms);
+	dory_node.set_program(&dory_shader, set_uniforms);
+
+	// Translate dory to set her in front of me
+	dory_node.get_transform().SetTranslate( glm::vec3( 0, -15, -20 ) );
+
+	// dory has to look in the same direction than me
+	dory_node.get_transform().RotateX( glm::half_pi<float>() );
+	dory_node.get_transform().RotateZ( glm::pi<float>() );
+
 
 	/* --------------------------------- Load textures ---------------------------------------*/
 
@@ -190,7 +198,7 @@ edaf80::Assignment5::run()
 	double fpsNextTick = lastTime + 1000.0;
 
 	bool show_logs = false;
-	bool show_gui = true;
+	bool show_gui = false;
 	bool shader_reload_failed = false;
 
 	auto polygon_mode = bonobo::polygon_mode_t::fill;
@@ -255,7 +263,7 @@ edaf80::Assignment5::run()
 			//
 			water_node.render(mCamera.GetWorldToClipMatrix());
 			sky_node.render(mCamera.GetWorldToClipMatrix());
-			//dory_node.render(mCamera.GetWorldToClipMatrix());
+			dory_node.render(mCamera.GetWorldToClipMatrix());
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
