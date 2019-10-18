@@ -32,15 +32,52 @@ edaf80::Assignment5::Assignment5(WindowManager& windowManager) :
 	}
 }
 
+/* Returns step vector for next position
+ * @param path position
+ * @param path
+ */
+glm::vec3 get_step( float path_pos,
+					std::vector<glm::vec3>& path ) {
+	float catmull_rom_tension = 0.5f;
+
+	int p0 = ((int)floor( path_pos ) -1 + path.size()) % path.size();
+	int p1 = ((int)floor( path_pos ) +0 + path.size()) % path.size();
+	int p2 = ((int)floor( path_pos ) +1 + path.size()) % path.size();
+	int p3 = ((int)floor( path_pos ) +2 + path.size()) % path.size();
+
+	float distance_ratio = path_pos - p1;
+
+	// Switch between linear and catmull-rom
+	/*
+	glm::vec3 step = interpolation::evalCatmullRom( path[p0],
+													path[p1],
+													path[p2],
+													path[p3],
+													catmull_rom_tension,
+													distance_ratio );
+	/*/
+	glm::vec3 step = interpolation::evalLERP( path[p1],
+											  path[p2],
+											  distance_ratio );
+	//*/
+
+	std::cerr << p0 << ", " << p1 << ", " << p2 << ", " << p3 << ", ";
+	std::cerr << distance_ratio << ", ";
+	std::cerr << step[0] << ", " << step[1] << ", " << step[2] << std::endl;
+	return step;
+}
+
+
 void
 edaf80::Assignment5::run()
 {
+	/* --------------------------------- Setup camera & motion ---------------------------------------*/
 	// Set up the camera
 	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, -10.0f, 0.0f)); // set start position underwater
 	mCamera.mMouseSensitivity = 0.003f;
-	mCamera.mMovementSpeed = 0.025;
+	mCamera.mMovementSpeed = 0.07;
 
-	/* --------------------------------- Create the shader programs ---------------------------------------*/
+	/* --------------------------------- Load the shader programs ---------------------------------------*/
 	// Set program manager
 	ShaderProgramManager program_manager;
 
@@ -222,27 +259,20 @@ edaf80::Assignment5::run()
 
 	/* --------------------------------- Motion management ---------------------------------------*/
 	bool enable_dory_motion = true;
-	float catmull_rom_tension = 0.5f;
 
 	// Create random path
 	size_t dory_path_length = 5; // number of points in the path
-	float dory_path_keypoint; // random y value for the path generation
+	float dory_path_keypoint = 1; // random y value for the path generation
 	std::vector<glm::vec3> dory_path_vector;
 
 
 	for(size_t i = 0; i < dory_path_length; i++) {
-		dory_path_keypoint = ((float( rand() ) / float( RAND_MAX )) * 2) - 1; // generate random number between -1 and 1
-		dory_path_vector.push_back( glm::vec3( dory_path_keypoint, 0, -static_cast<float>(i) ) );
+		dory_path_keypoint *= -1;
+		dory_path_vector.push_back( glm::vec3( dory_path_keypoint, 0, -1 ) );
 	}
 
-	glm::vec3 dory_initial_position = dory_node.get_transform().GetTranslation(); // store initial position
 	float dory_path_pos = 0.0f;
-	float dory_velocity = 0.005f;
-	int dory_current_point_index = 0;
-	int dory_next_point_index = 0;
-	int dory_next2_point_index = 0;
-	int dory_previous_point_index = 0;
-	float dory_distance_ratio = 0;
+	float dory_velocity = 0.2f;
 
 
 	/* --------------------------------- GL Parameters ---------------------------------------*/
@@ -307,7 +337,7 @@ edaf80::Assignment5::run()
 			// Switch between polygon modes
 			polygon_mode = static_cast<bonobo::polygon_mode_t>((static_cast<int>(polygon_mode) + 1) % 3);
 		}
-		if(inputHandler.GetKeycodeState( GLFW_KEY_M ) & JUST_PRESSED) {
+		if(inputHandler.GetKeycodeState( GLFW_KEY_SPACE ) & JUST_PRESSED) {
 			// Enable/Disable Dory Motion
 			enable_dory_motion = !enable_dory_motion;
 		}
@@ -317,50 +347,12 @@ edaf80::Assignment5::run()
 		// Move Dory
 		if(enable_dory_motion) {
 
-			// TODO : use modulo instead of this ugly if statements
-			// TODO : create function to compute this path instead of pulluting main function
-
-			dory_current_point_index = floor( dory_path_pos );
-			dory_next_point_index = dory_current_point_index + 1;
-			dory_next2_point_index = dory_current_point_index + 2;
-			dory_previous_point_index = dory_current_point_index - 1;
-			dory_distance_ratio = dory_path_pos - dory_current_point_index;
-
-			// manage path circularity
-			if(dory_current_point_index == dory_path_vector.size() - 2)
-			{
-				dory_next2_point_index = 0;
-			}
-			if(dory_current_point_index == dory_path_vector.size() - 1)
-			{
-				dory_next_point_index = 0;
-				dory_next2_point_index = 1;
-			}
-			if(dory_current_point_index == dory_path_vector.size())
-			{
-				dory_current_point_index = 0;
-				dory_next_point_index = 1;
-				dory_next2_point_index = 2;
-				dory_path_pos = 0;
-			}
-			if(dory_current_point_index == 0)
-			{
-				// initialize dory position after path loop
-				dory_node.get_transform().SetTranslate( dory_initial_position );
-
-				dory_previous_point_index = dory_path_vector.size() - 1;
-			}
-
-			// compute linear translation 
-			glm::vec3 q_step = interpolation::evalCatmullRom(   dory_path_vector[dory_previous_point_index],
-																dory_path_vector[dory_current_point_index],
-																dory_path_vector[dory_next_point_index],
-																dory_path_vector[dory_next2_point_index],
-																catmull_rom_tension,
-																dory_distance_ratio );
-
-			// translate dory along the interpolated path
-			dory_node.get_transform().Translate( q_step );
+			// translate dory of one step
+			glm::vec3 step = get_step( dory_path_pos, dory_path_vector );
+			//std::cerr << step[0] << ", " << step[1] << ", " << step[2] << std::endl;
+			//dory_node.get_transform().Translate( get_step( dory_path_pos,
+			//											   dory_path_vector) );
+			// increase dory postion using her speed
 			dory_path_pos += dory_velocity;
 		}
 
@@ -377,10 +369,10 @@ edaf80::Assignment5::run()
 			//
 			// Render all geometries
 			//
-			water_node.render(mCamera.GetWorldToClipMatrix());
-			sky_node.render(mCamera.GetWorldToClipMatrix());
+			//water_node.render(mCamera.GetWorldToClipMatrix());
+			//sky_node.render(mCamera.GetWorldToClipMatrix());
 			dory_node.render(mCamera.GetWorldToClipMatrix());
-			mine_node.render( mCamera.GetWorldToClipMatrix() );
+			//mine_node.render( mCamera.GetWorldToClipMatrix() );
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
