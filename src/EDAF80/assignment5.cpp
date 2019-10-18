@@ -41,7 +41,7 @@ glm::vec3 get_step( float path_pos,
 	//float catmull_rom_tension = 0.5f;
 
 	//int p0 = ((int)floor( path_pos ) -1 + path.size()) % path.size();
-	//int p1 = ((int)floor( path_pos ) +0 + path.size()) % path.size();
+	int p1 = ((int)floor( path_pos ) +0 + path.size()) % path.size();
 	//int p2 = ((int)floor( path_pos ) +1 + path.size()) % path.size();
 	//int p3 = ((int)floor( path_pos ) +2 + path.size()) % path.size();
 
@@ -65,7 +65,7 @@ glm::vec3 get_step( float path_pos,
 	//std::cerr << distance_ratio << ", ";
 	//std::cerr << step[0] << ", " << step[1] << ", " << step[2] << std::endl;
 	//return step;
-	return glm::vec3( 0, 0, -1 );
+	return path[p1];
 }
 
 
@@ -262,7 +262,7 @@ edaf80::Assignment5::run()
 	bool enable_dory_motion = true;
 
 	// Create random path
-	size_t dory_path_length = 5; // number of points in the path
+	size_t dory_path_length = 6; // number of points in the path
 	float dory_path_keypoint = 1; // random y value for the path generation
 	std::vector<glm::vec3> dory_path_vector;
 
@@ -272,7 +272,7 @@ edaf80::Assignment5::run()
 		dory_path_vector.push_back( glm::vec3( dory_path_keypoint, 0, -1 ) );
 	}
 
-	float dory_path_pos = 0.0f;
+	float dory_path_pos = -0.5f;
 	float dory_velocity = 0.2f;
 
 
