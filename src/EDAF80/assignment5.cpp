@@ -262,13 +262,14 @@ edaf80::Assignment5::run()
 	bool enable_dory_motion = true;
 
 	// Create random path
-	size_t dory_path_length = 6; // number of points in the path
+	size_t dory_path_length = 16; // number of points in the path
 	float dory_path_keypoint = 1; // random y value for the path generation
 	std::vector<glm::vec3> dory_path_vector;
 
 
 	for(size_t i = 0; i < dory_path_length; i++) {
-		dory_path_keypoint *= -1;
+		dory_path_keypoint = ((float( rand() ) / float( RAND_MAX )) * 2) - 1; // generate random float number between -1 and 1
+		dory_path_keypoint *= 5; // transform number to be between -5 and 5
 		dory_path_vector.push_back( glm::vec3( dory_path_keypoint, 0, -1 ) );
 	}
 
