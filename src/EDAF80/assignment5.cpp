@@ -38,14 +38,14 @@ edaf80::Assignment5::Assignment5(WindowManager& windowManager) :
  */
 glm::vec3 get_step( float path_pos,
 					std::vector<glm::vec3>& path ) {
-	float catmull_rom_tension = 0.5f;
+	//float catmull_rom_tension = 0.5f;
 
-	int p0 = ((int)floor( path_pos ) -1 + path.size()) % path.size();
-	int p1 = ((int)floor( path_pos ) +0 + path.size()) % path.size();
-	int p2 = ((int)floor( path_pos ) +1 + path.size()) % path.size();
-	int p3 = ((int)floor( path_pos ) +2 + path.size()) % path.size();
+	//int p0 = ((int)floor( path_pos ) -1 + path.size()) % path.size();
+	//int p1 = ((int)floor( path_pos ) +0 + path.size()) % path.size();
+	//int p2 = ((int)floor( path_pos ) +1 + path.size()) % path.size();
+	//int p3 = ((int)floor( path_pos ) +2 + path.size()) % path.size();
 
-	float distance_ratio = path_pos - p1;
+	//float distance_ratio = path_pos - p1;
 
 	// Switch between linear and catmull-rom
 	/*
@@ -56,15 +56,16 @@ glm::vec3 get_step( float path_pos,
 													catmull_rom_tension,
 													distance_ratio );
 	/*/
-	glm::vec3 step = interpolation::evalLERP( path[p1],
-											  path[p2],
-											  distance_ratio );
+	//glm::vec3 step = interpolation::evalLERP( path[p1],
+	//										  path[p2],
+	//										  distance_ratio );
 	//*/
 
-	std::cerr << p0 << ", " << p1 << ", " << p2 << ", " << p3 << ", ";
-	std::cerr << distance_ratio << ", ";
-	std::cerr << step[0] << ", " << step[1] << ", " << step[2] << std::endl;
-	return step;
+	//std::cerr << p0 << ", " << p1 << ", " << p2 << ", " << p3 << ", ";
+	//std::cerr << distance_ratio << ", ";
+	//std::cerr << step[0] << ", " << step[1] << ", " << step[2] << std::endl;
+	//return step;
+	return glm::vec3( 0, 0, -1 );
 }
 
 
@@ -349,9 +350,8 @@ edaf80::Assignment5::run()
 
 			// translate dory of one step
 			glm::vec3 step = get_step( dory_path_pos, dory_path_vector );
-			//std::cerr << step[0] << ", " << step[1] << ", " << step[2] << std::endl;
-			//dory_node.get_transform().Translate( get_step( dory_path_pos,
-			//											   dory_path_vector) );
+			dory_node.get_transform().Translate( get_step( dory_path_pos,
+														   dory_path_vector) );
 			// increase dory postion using her speed
 			dory_path_pos += dory_velocity;
 		}
