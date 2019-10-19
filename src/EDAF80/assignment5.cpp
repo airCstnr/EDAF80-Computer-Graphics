@@ -268,7 +268,7 @@ edaf80::Assignment5::run()
 
 	for(size_t i = 0; i < dory_path_length; i++) {
 		dory_path_keypoint = ((float( rand() ) / float( RAND_MAX )) * 2) - 1; // generate random float number between -1 and 1
-		dory_path_keypoint *= 5; // transform number to be between -5 and 5
+		//dory_path_keypoint *= 5; // transform number to be between -5 and 5
 		dory_path_vector.push_back( glm::vec3( dory_path_keypoint, 0, -1 ) );
 	}
 
@@ -351,6 +351,9 @@ edaf80::Assignment5::run()
 			glm::vec3 step = get_step( dory_path_pos, dory_path_vector ); // get step
 			step = glm::normalize( step ) * dory_velocity; // make this step proportional to velocity
 			dory_node.get_transform().Translate( step ); // apply step
+			// dory looks in her translation direction!
+			dory_node.get_transform().RotateX( glm::dot( step, glm::vec3( 0, 1, 0 ) ) * dory_velocity );
+			dory_node.get_transform().RotateY( glm::dot( step, dory_node.get_transform().GetBack() ) * dory_velocity );
 			// increase dory postion using her velocity
 			dory_path_pos += dory_velocity;
 		}
