@@ -26,6 +26,9 @@ namespace edaf80
 		~Assignment5() = default;
 
 		void setup_camera();
+		glm::vec3 get_step( float path_pos,
+							std::vector<glm::vec3>& path );
+
 		//! \brief Contains the logic of the assignment, along with the
 		//! render loop.
 		void run();

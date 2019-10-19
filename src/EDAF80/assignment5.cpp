@@ -44,8 +44,8 @@ void edaf80::Assignment5::setup_camera()
  * @param path position
  * @param path
  */
-glm::vec3 get_step( float path_pos,
-					std::vector<glm::vec3>& path ) {
+glm::vec3 Assignment5::get_step( float path_pos,
+								 std::vector<glm::vec3>& path ) {
 	float catmull_rom_tension = 0.5f;
 	float frequency = 0.1;
 
