@@ -38,17 +38,17 @@ edaf80::Assignment5::Assignment5(WindowManager& windowManager) :
  */
 glm::vec3 get_step( float path_pos,
 					std::vector<glm::vec3>& path ) {
-	//float catmull_rom_tension = 0.5f;
+	float catmull_rom_tension = 0.5f;
 
-	//int p0 = ((int)floor( path_pos ) -1 + path.size()) % path.size();
+	int p0 = ((int)floor( path_pos ) -1 + path.size()) % path.size();
 	int p1 = ((int)floor( path_pos ) +0 + path.size()) % path.size();
 	int p2 = ((int)floor( path_pos ) +1 + path.size()) % path.size();
-	//int p3 = ((int)floor( path_pos ) +2 + path.size()) % path.size();
+	int p3 = ((int)floor( path_pos ) +2 + path.size()) % path.size();
 
 	float distance_ratio = path_pos - floor( path_pos );
 
 	// Switch between linear and catmull-rom
-	/*
+	//*
 	glm::vec3 step = interpolation::evalCatmullRom( path[p0],
 													path[p1],
 													path[p2],
@@ -61,8 +61,6 @@ glm::vec3 get_step( float path_pos,
 											  distance_ratio );
 	//*/
 
-	//std::cerr << p0 << ", " << p1 << ", " << p2 << ", " << p3 << ", ";
-	//std::cerr << distance_ratio << ", ";
 	return step;
 }
 
@@ -264,15 +262,14 @@ edaf80::Assignment5::run()
 	float dory_path_keypoint = 1; // random y value for the path generation
 	std::vector<glm::vec3> dory_path_vector;
 
-
 	for(size_t i = 0; i < dory_path_length; i++) {
 		dory_path_keypoint = ((float( rand() ) / float( RAND_MAX )) * 2) - 1; // generate random float number between -1 and 1
 		dory_path_keypoint *= 5; // transform number to be between -5 and 5
 		dory_path_vector.push_back( glm::vec3( dory_path_keypoint, 0, -1 ) );
 	}
 
-	float dory_path_pos = -0.5f;
-	float dory_velocity = 0.2f;
+	float dory_path_pos = 0.0f;
+	float dory_velocity = 0.1f;
 
 
 	/* --------------------------------- GL Parameters ---------------------------------------*/
@@ -347,9 +344,10 @@ edaf80::Assignment5::run()
 		// Move Dory
 		if(enable_dory_motion) {
 			// translate dory of one step
-			dory_node.get_transform().Translate( get_step( dory_path_pos,
-														   dory_path_vector) );
-			// increase dory postion using her speed
+			glm::vec3 step = get_step( dory_path_pos, dory_path_vector ); // get step
+			step = glm::normalize( step ) * dory_velocity; // make this step proportional to velocity
+			dory_node.get_transform().Translate( step ); // apply step
+			// increase dory postion using her velocity
 			dory_path_pos += dory_velocity;
 		}
 
