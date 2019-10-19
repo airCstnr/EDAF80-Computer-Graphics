@@ -143,6 +143,14 @@ edaf80::Assignment5::run()
 	}
 	bonobo::mesh_data const& mine = mine_object.front();
 
+	// Load nemo
+	std::vector<bonobo::mesh_data> const nemo_object = bonobo::loadObjects( "nemo.obj" );
+	if(nemo_object.empty()) {
+		LogError( "Failed to load the nemo model" );
+		return;
+	}
+	bonobo::mesh_data const& nemo = nemo_object.front();
+
 	/* --------------------------------- Set up uniforms ---------------------------------------*/
 
 	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
@@ -197,6 +205,13 @@ edaf80::Assignment5::run()
 	mine_node.set_program( &phong_shader, phong_set_uniforms );
 	mine_node.get_transform().SetScale( 0.1 );
 	mine_node.get_transform().SetTranslate( glm::vec3( 20, -15, -20 ) );
+
+	// Set up node for nemo
+	auto nemo_node = Node();
+	nemo_node.set_geometry( nemo );
+	nemo_node.set_program( &phong_shader, phong_set_uniforms );
+	//nemo_node.get_transform().SetScale( 0.1 );
+	//nemo_node.get_transform().SetTranslate( glm::vec3( 20, -15, -20 ) );
 
 
 	/* --------------------------------- Load textures ---------------------------------------*/
@@ -377,10 +392,11 @@ edaf80::Assignment5::run()
 			//
 			// Render all geometries
 			//
-			water_node.render(mCamera.GetWorldToClipMatrix());
-			sky_node.render(mCamera.GetWorldToClipMatrix());
-			dory_node.render(mCamera.GetWorldToClipMatrix());
-			mine_node.render( mCamera.GetWorldToClipMatrix() );
+			//water_node.render(mCamera.GetWorldToClipMatrix());
+			//sky_node.render(mCamera.GetWorldToClipMatrix());
+			//dory_node.render(mCamera.GetWorldToClipMatrix());
+			//mine_node.render( mCamera.GetWorldToClipMatrix() );
+			nemo_node.render( mCamera.GetWorldToClipMatrix() );
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
