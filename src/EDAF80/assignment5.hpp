@@ -37,10 +37,10 @@ namespace edaf80
 		void run();
 
 	private:
-		FPSCameraf     mCamera;
-		InputHandler   inputHandler;
-		WindowManager& mWindowManager;
-		GLFWwindow*    window;
+		FPSCameraf     _camera;
+		InputHandler   _inputHandler;
+		WindowManager& _windowManager;
+		GLFWwindow*    _window;
 		ShaderProgramManager _program_manager;
 
 		// Shaders identifiers

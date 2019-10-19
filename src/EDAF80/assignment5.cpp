@@ -17,16 +17,23 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "interpolation.hpp"
 
-edaf80::Assignment5::Assignment5(WindowManager& windowManager) :
-	mCamera(0.5f * glm::half_pi<float>(),
-	        static_cast<float>(config::resolution_x) / static_cast<float>(config::resolution_y),
-	        0.01f, 1000.0f),
-	inputHandler(), mWindowManager(windowManager), window(nullptr)
-{
-	WindowManager::WindowDatum window_datum{ inputHandler, mCamera, config::resolution_x, config::resolution_y, 0, 0, 0, 0};
 
-	window = mWindowManager.CreateGLFWWindow("EDAF80: Assignment 5", window_datum, config::msaa_rate);
-	if (window == nullptr) {
+using namespace edaf80;
+
+
+Assignment5::Assignment5( WindowManager& windowManager ) :
+	_camera( 0.5f * glm::half_pi<float>(),
+			static_cast<float>(config::resolution_x) / static_cast<float>(config::resolution_y),
+			0.01f, 1000.0f ),
+	_inputHandler(),
+	_windowManager( windowManager ),
+	_window( nullptr ),
+	_program_manager()
+{
+	WindowManager::WindowDatum window_datum{ _inputHandler, _camera, config::resolution_x, config::resolution_y, 0, 0, 0, 0};
+
+	_window = _windowManager.CreateGLFWWindow("EDAF80: Assignment 5", window_datum, config::msaa_rate);
+	if (_window == nullptr) {
 		throw std::runtime_error("Failed to get a window: aborting!");
 	}
 }
@@ -189,7 +196,7 @@ edaf80::Assignment5::run()
 	/* --------------------------------- Set up uniforms ---------------------------------------*/
 
 	auto light_position = glm::vec3(-2.0f, 40.0f, 2.0f);
-	auto camera_position = mCamera.mWorld.GetTranslation();
+	auto camera_position = _camera.mWorld.GetTranslation();
 	auto time = 0.0f;
 	auto const set_uniforms = [&light_position, &camera_position, &time](GLuint program) {
 		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
@@ -228,19 +235,19 @@ edaf80::Assignment5::run()
 	// Set up node for water
 	auto water_node = Node();
 	water_node.set_geometry(water_shape);
-	water_node.set_program(&water_shader, set_uniforms);
+	water_node.set_program(&_water_shader, set_uniforms);
 	// Translate waves to set them at the center of the skybox
 	water_node.get_transform().SetTranslate(glm::vec3(-100, 0, -100));
 
 	// Set up node for skybox
 	auto sky_node = Node();
 	sky_node.set_geometry(sky_shape);
-	sky_node.set_program(&skybox_shader, set_uniforms);
+	sky_node.set_program(&_skybox_shader, set_uniforms);
 
 	// Set up node for dory
 	auto dory_node = Node();
 	dory_node.set_geometry(dory);
-	dory_node.set_program(&dory_shader, set_uniforms);
+	dory_node.set_program(&_dory_shader, set_uniforms);
 	// Translate dory to set her in front of me
 	dory_node.get_transform().SetTranslate( glm::vec3( 0, -15, -20 ) );
 	// dory has to look in the same direction than me
@@ -250,14 +257,14 @@ edaf80::Assignment5::run()
 	// Set up node for mine
 	auto mine_node = Node();
 	mine_node.set_geometry( mine );
-	mine_node.set_program( &phong_shader, phong_set_uniforms );
+	mine_node.set_program( &_phong_shader, phong_set_uniforms );
 	mine_node.get_transform().SetScale( 0.1 );
 	mine_node.get_transform().SetTranslate( glm::vec3( 20, -15, -20 ) );
 
 	// Set up node for nemo
 	auto nemo_node = Node();
 	nemo_node.set_geometry( nemo );
-	nemo_node.set_program( &phong_shader, nemo_set_uniforms );
+	nemo_node.set_program( &_phong_shader, nemo_set_uniforms );
 	nemo_node.get_transform().SetScale( 0.1 );
 	nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -15, -10 ) );
 	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
@@ -329,7 +336,7 @@ edaf80::Assignment5::run()
 
 	/* --------------------------------- Render loop ---------------------------------------*/
 
-	while (!glfwWindowShouldClose(window)) {
+	while (!glfwWindowShouldClose(_window)) {
 		nowTime = GetTimeMilliseconds();
 		ddeltatime = nowTime - lastTime;
 		if (nowTime > fpsNextTick) {
@@ -342,29 +349,29 @@ edaf80::Assignment5::run()
 		time += 0.01;
 
 		auto& io = ImGui::GetIO();
-		inputHandler.SetUICapture(io.WantCaptureMouse, io.WantCaptureKeyboard);
+		_inputHandler.SetUICapture(io.WantCaptureMouse, io.WantCaptureKeyboard);
 
 		glfwPollEvents();
-		inputHandler.Advance();
-		mCamera.Update(ddeltatime, inputHandler);
+		_inputHandler.Advance();
+		_camera.Update(ddeltatime, _inputHandler);
 
-		if (inputHandler.GetKeycodeState(GLFW_KEY_F3) & JUST_RELEASED)
+		if (_inputHandler.GetKeycodeState(GLFW_KEY_F3) & JUST_RELEASED)
 			show_logs = !show_logs;
-		if (inputHandler.GetKeycodeState(GLFW_KEY_F2) & JUST_RELEASED)
+		if (_inputHandler.GetKeycodeState(GLFW_KEY_F2) & JUST_RELEASED)
 			show_gui = !show_gui;
-		if (inputHandler.GetKeycodeState(GLFW_KEY_R) & JUST_PRESSED) {
-			shader_reload_failed = !program_manager.ReloadAllPrograms();
+		if (_inputHandler.GetKeycodeState(GLFW_KEY_R) & JUST_PRESSED) {
+			shader_reload_failed = !_program_manager.ReloadAllPrograms();
 			if (shader_reload_failed)
 				tinyfd_notifyPopup("Shader Program Reload Error",
 				                   "An error occurred while reloading shader programs; see the logs for details.\n"
 				                   "Rendering is suspended until the issue is solved. Once fixed, just reload the shaders again.",
 				                   "error");
 		}
-		if(inputHandler.GetKeycodeState( GLFW_KEY_P ) & JUST_PRESSED) {
+		if(_inputHandler.GetKeycodeState( GLFW_KEY_P ) & JUST_PRESSED) {
 			// Switch between polygon modes
 			polygon_mode = static_cast<bonobo::polygon_mode_t>((static_cast<int>(polygon_mode) + 1) % 3);
 		}
-		if(inputHandler.GetKeycodeState( GLFW_KEY_SPACE ) & JUST_PRESSED) {
+		if(_inputHandler.GetKeycodeState( GLFW_KEY_SPACE ) & JUST_PRESSED) {
 			// Enable/Disable Dory Motion
 			enable_dory_motion = !enable_dory_motion;
 		}
@@ -385,7 +392,7 @@ edaf80::Assignment5::run()
 		}
 
 		int framebuffer_width, framebuffer_height;
-		glfwGetFramebufferSize(window, &framebuffer_width, &framebuffer_height);
+		glfwGetFramebufferSize(_window, &framebuffer_width, &framebuffer_height);
 		glViewport(0, 0, framebuffer_width, framebuffer_height);
 		glClearDepthf(1.0f);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -397,11 +404,11 @@ edaf80::Assignment5::run()
 			//
 			// Render all geometries
 			//
-			water_node.render(mCamera.GetWorldToClipMatrix());
-			sky_node.render(mCamera.GetWorldToClipMatrix());
-			dory_node.render(mCamera.GetWorldToClipMatrix());
-			mine_node.render( mCamera.GetWorldToClipMatrix() );
-			nemo_node.render( mCamera.GetWorldToClipMatrix(), mCamera.mWorld.GetTranslationMatrix() );
+			water_node.render(_camera.GetWorldToClipMatrix());
+			sky_node.render(_camera.GetWorldToClipMatrix());
+			dory_node.render(_camera.GetWorldToClipMatrix());
+			mine_node.render( _camera.GetWorldToClipMatrix() );
+			nemo_node.render( _camera.GetWorldToClipMatrix(), _camera.mWorld.GetTranslationMatrix() );
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -420,7 +427,7 @@ edaf80::Assignment5::run()
 		if (show_gui)
 			ImGui::Render();
 
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(_window);
 		lastTime = nowTime;
 	}
 }
