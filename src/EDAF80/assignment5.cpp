@@ -224,7 +224,7 @@ edaf80::Assignment5::run()
 	nemo_node.set_geometry( nemo );
 	nemo_node.set_program( &phong_shader, nemo_set_uniforms );
 	nemo_node.get_transform().SetScale( 0.1 );
-	nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -22, -10 ) );
+	nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -15, -10 ) );
 	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
 
 
@@ -410,7 +410,7 @@ edaf80::Assignment5::run()
 			//sky_node.render(mCamera.GetWorldToClipMatrix());
 			//dory_node.render(mCamera.GetWorldToClipMatrix());
 			//mine_node.render( mCamera.GetWorldToClipMatrix() );
-			nemo_node.render( mCamera.GetWorldToClipMatrix() );
+			nemo_node.render( mCamera.GetWorldToClipMatrix(), mCamera.mWorld.GetTranslationMatrix() );
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
