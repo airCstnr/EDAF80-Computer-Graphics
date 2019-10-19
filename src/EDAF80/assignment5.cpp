@@ -181,9 +181,17 @@ edaf80::Assignment5::run()
 	}
 	bonobo::mesh_data const& mine = mine_object.front();
 
+	// Load nemo
+	std::vector<bonobo::mesh_data> const nemo_object = bonobo::loadObjects( "nemo.obj" );
+	if(nemo_object.empty()) {
+		LogError( "Failed to load the nemo model" );
+		return;
+	}
+	bonobo::mesh_data const& nemo = nemo_object.front();
+
 	/* --------------------------------- Set up uniforms ---------------------------------------*/
 
-	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
+	auto light_position = glm::vec3(-2.0f, 40.0f, 2.0f);
 	auto camera_position = mCamera.mWorld.GetTranslation();
 	auto time = 0.0f;
 	auto const set_uniforms = [&light_position, &camera_position, &time](GLuint program) {
@@ -203,6 +211,19 @@ edaf80::Assignment5::run()
 		glUniform3fv( glGetUniformLocation( program, "diffuse" ), 1, glm::value_ptr( diffuse ) );
 		glUniform3fv( glGetUniformLocation( program, "specular" ), 1, glm::value_ptr( specular ) );
 		glUniform1f( glGetUniformLocation( program, "shininess" ), shininess );
+	};
+
+	auto nemo_ambient = glm::vec3( (252/255), (140/255), (3/255) );
+	auto nemo_diffuse = glm::vec3( 0.9f, 0.3f, 0.1f );
+	auto nemo_specular = glm::vec3( 1.0f, 1.0f, 1.0f );
+	auto nemo_shininess = 2.0f;
+	auto const nemo_set_uniforms = [&light_position, &camera_position, &nemo_ambient, &nemo_diffuse, &nemo_specular, &nemo_shininess]( GLuint program ) {
+		glUniform3fv( glGetUniformLocation( program, "light_position" ), 1, glm::value_ptr( light_position ) );
+		glUniform3fv( glGetUniformLocation( program, "camera_position" ), 1, glm::value_ptr( camera_position ) );
+		glUniform3fv( glGetUniformLocation( program, "ambient" ), 1, glm::value_ptr( nemo_ambient ) );
+		glUniform3fv( glGetUniformLocation( program, "diffuse" ), 1, glm::value_ptr( nemo_diffuse ) );
+		glUniform3fv( glGetUniformLocation( program, "specular" ), 1, glm::value_ptr( nemo_specular ) );
+		glUniform1f( glGetUniformLocation( program, "shininess" ), nemo_shininess );
 	};
 
 	/* --------------------------------- Set up nodes ---------------------------------------*/
@@ -235,6 +256,14 @@ edaf80::Assignment5::run()
 	mine_node.set_program( &phong_shader, phong_set_uniforms );
 	mine_node.get_transform().SetScale( 0.1 );
 	mine_node.get_transform().SetTranslate( glm::vec3( 20, -15, -20 ) );
+
+	// Set up node for nemo
+	auto nemo_node = Node();
+	nemo_node.set_geometry( nemo );
+	nemo_node.set_program( &phong_shader, nemo_set_uniforms );
+	nemo_node.get_transform().SetScale( 0.1 );
+	nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -15, -10 ) );
+	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
 
 
 	/* --------------------------------- Load textures ---------------------------------------*/
@@ -371,10 +400,11 @@ edaf80::Assignment5::run()
 			//
 			// Render all geometries
 			//
-			//water_node.render(mCamera.GetWorldToClipMatrix());
-			//sky_node.render(mCamera.GetWorldToClipMatrix());
+			water_node.render(mCamera.GetWorldToClipMatrix());
+			sky_node.render(mCamera.GetWorldToClipMatrix());
 			dory_node.render(mCamera.GetWorldToClipMatrix());
-			//mine_node.render( mCamera.GetWorldToClipMatrix() );
+			mine_node.render( mCamera.GetWorldToClipMatrix() );
+			nemo_node.render( mCamera.GetWorldToClipMatrix(), mCamera.mWorld.GetTranslationMatrix() );
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
