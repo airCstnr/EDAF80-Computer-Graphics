@@ -210,8 +210,9 @@ edaf80::Assignment5::run()
 	auto nemo_node = Node();
 	nemo_node.set_geometry( nemo );
 	nemo_node.set_program( &phong_shader, phong_set_uniforms );
-	//nemo_node.get_transform().SetScale( 0.1 );
-	//nemo_node.get_transform().SetTranslate( glm::vec3( 20, -15, -20 ) );
+	nemo_node.get_transform().SetScale( 0.1 );
+	nemo_node.get_transform().SetTranslate( glm::vec3( 0, -15, -20 ) );
+	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
 
 
 	/* --------------------------------- Load textures ---------------------------------------*/
