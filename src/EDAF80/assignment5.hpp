@@ -25,6 +25,7 @@ namespace edaf80
 		//! constructor, as well as the window.
 		~Assignment5() = default;
 
+		void setup_camera();
 		//! \brief Contains the logic of the assignment, along with the
 		//! render loop.
 		void run();

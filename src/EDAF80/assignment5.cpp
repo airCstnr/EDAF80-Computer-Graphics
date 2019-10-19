@@ -32,6 +32,14 @@ edaf80::Assignment5::Assignment5(WindowManager& windowManager) :
 	}
 }
 
+void edaf80::Assignment5::setup_camera()
+{
+	// Set up the camera
+	_camera.mWorld.SetTranslate( glm::vec3( 0.0f, -10.0f, 0.0f ) ); // set start position underwater
+	_camera.mMouseSensitivity = 0.003f;
+	_camera.mMovementSpeed = 0.07;
+}
+
 /* Returns step vector for next position
  * @param path position
  * @param path
@@ -73,10 +81,7 @@ void
 edaf80::Assignment5::run()
 {
 	/* --------------------------------- Setup camera & motion ---------------------------------------*/
-	// Set up the camera
-	mCamera.mWorld.SetTranslate(glm::vec3(0.0f, -10.0f, 0.0f)); // set start position underwater
-	mCamera.mMouseSensitivity = 0.003f;
-	mCamera.mMovementSpeed = 0.07;
+	setup_camera();
 
 	/* --------------------------------- Load the shader programs ---------------------------------------*/
 	// Set program manager
