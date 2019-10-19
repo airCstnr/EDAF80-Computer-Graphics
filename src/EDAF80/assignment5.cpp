@@ -39,6 +39,7 @@ edaf80::Assignment5::Assignment5(WindowManager& windowManager) :
 glm::vec3 get_step( float path_pos,
 					std::vector<glm::vec3>& path ) {
 	float catmull_rom_tension = 0.5f;
+	float frequency = 0.1;
 
 	int p0 = ((int)floor( path_pos ) -1 + path.size()) % path.size();
 	int p1 = ((int)floor( path_pos ) +0 + path.size()) % path.size();
@@ -60,6 +61,9 @@ glm::vec3 get_step( float path_pos,
 											  path[p2],
 											  distance_ratio );
 	//*/
+
+	// add sinus to y
+	step[1] = sin( path_pos * glm::two_pi<float>() * frequency );
 
 	return step;
 }
