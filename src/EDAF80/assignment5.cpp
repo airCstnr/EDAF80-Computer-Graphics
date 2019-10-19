@@ -5,7 +5,6 @@
 #include "core/FPSCamera.h"
 #include "core/helpers.hpp"
 #include "core/Misc.h"
-#include "core/ShaderProgramManager.hpp"
 
 #include <imgui.h>
 #include <external/imgui_impl_glfw_gl3.h>
@@ -39,6 +38,65 @@ void edaf80::Assignment5::setup_camera()
 	_camera.mMouseSensitivity = 0.003f;
 	_camera.mMovementSpeed = 0.07;
 }
+
+void edaf80::Assignment5::setup_program_manager()
+{
+	// Set program manager
+	_program_manager.CreateAndRegisterProgram( "Texture coords",
+												 { { ShaderType::vertex, "EDAF80/texcoord.vert" },
+												   { ShaderType::fragment, "EDAF80/texcoord.frag" } },
+												_texcoord_shader );
+	if(_texcoord_shader == 0u) {
+		LogError( "Failed to load texcoord shader" );
+		return;
+	}
+
+	_program_manager.CreateAndRegisterProgram( "Dory texture mapping",
+												{ { ShaderType::vertex, "EDAF80/dory.vert" },
+												{ ShaderType::fragment, "EDAF80/dory.frag" } },
+												_dory_shader );
+	if(_dory_shader == 0u) {
+		LogError( "Failed to load Celestial Ring shader" );
+		return;
+	}
+
+	_program_manager.CreateAndRegisterProgram( "Fallback",
+												{ { ShaderType::vertex, "EDAF80/fallback.vert" },
+												  { ShaderType::fragment, "EDAF80/fallback.frag" } },
+												_fallback_shader );
+	if(_fallback_shader == 0u) {
+		LogError( "Failed to load fallback shader" );
+		return;
+	}
+
+	_program_manager.CreateAndRegisterProgram( "Water",
+												{ { ShaderType::vertex, "EDAF80/water.vert" },
+												{ ShaderType::fragment, "EDAF80/water.frag" } },
+												_water_shader );
+	if(_water_shader == 0u) {
+		LogError( "Failed to load water shader" );
+		return;
+	}
+
+	_program_manager.CreateAndRegisterProgram( "Sky Box",
+												{ { ShaderType::vertex, "EDAF80/skybox.vert" },
+												{ ShaderType::fragment, "EDAF80/skybox.frag" } },
+												_skybox_shader );
+	if(_skybox_shader == 0u) {
+		LogError( "Failed to load skybox shader" );
+		return;
+	}
+
+	_program_manager.CreateAndRegisterProgram( "Phong shader",
+												{ { ShaderType::vertex, "EDAF80/phong.vert" },
+												{ ShaderType::fragment, "EDAF80/phong.frag" } },
+												_phong_shader );
+	if(_phong_shader == 0u) {
+		LogError( "Failed to load phong shader" );
+		return;
+	}
+}
+
 
 /* Returns step vector for next position
  * @param path position
@@ -84,73 +142,7 @@ edaf80::Assignment5::run()
 	setup_camera();
 
 	/* --------------------------------- Load the shader programs ---------------------------------------*/
-	// Set program manager
-	ShaderProgramManager program_manager;
-
-	// Create and load the fallback shader
-	GLuint texcoord_shader = 0u;
-	program_manager.CreateAndRegisterProgram("Texture coords",
-	                                         { { ShaderType::vertex, "EDAF80/texcoord.vert" },
-	                                           { ShaderType::fragment, "EDAF80/texcoord.frag" } },
-											texcoord_shader);
-	if (texcoord_shader == 0u) {
-		LogError("Failed to load texcoord shader");
-		return;
-	}
-
-	// Add texture shader, using Celestial Ring shagers from assignment 1
-	GLuint dory_shader = 0u;
-	program_manager.CreateAndRegisterProgram("Dory texture mapping",
-												{ { ShaderType::vertex, "EDAF80/dory.vert" },
-												{ ShaderType::fragment, "EDAF80/dory.frag" } },
-												dory_shader);
-	if (dory_shader == 0u) {
-		LogError("Failed to load Celestial Ring shader");
-		return;
-	}
-
-	// Create and load the fallback shader
-	GLuint fallback_shader = 0u;
-	program_manager.CreateAndRegisterProgram("Fallback",
-		{ { ShaderType::vertex, "EDAF80/fallback.vert" },
-		  { ShaderType::fragment, "EDAF80/fallback.frag" } },
-		fallback_shader);
-	if (fallback_shader == 0u) {
-		LogError("Failed to load fallback shader");
-		return;
-	}
-
-	// Create and load the water shader
-	GLuint water_shader = 0u;
-	program_manager.CreateAndRegisterProgram("Water",
-											{ { ShaderType::vertex, "EDAF80/water.vert" },
-											{ ShaderType::fragment, "EDAF80/water.frag" } },
-											water_shader);
-	if (water_shader == 0u) {
-		LogError("Failed to load water shader");
-		return;
-	}
-
-	// Create and load the skybox shader
-	GLuint skybox_shader = 0u;
-	program_manager.CreateAndRegisterProgram("Sky Box",
-											{ { ShaderType::vertex, "EDAF80/skybox.vert" },
-											{ ShaderType::fragment, "EDAF80/skybox.frag" } },
-											skybox_shader);
-	if (skybox_shader == 0u) {
-		LogError("Failed to load skybox shader");
-		return;
-	}
-
-	GLuint phong_shader = 0u;
-	program_manager.CreateAndRegisterProgram( "Phong shader",
-											{ { ShaderType::vertex, "EDAF80/phong.vert" },
-												{ ShaderType::fragment, "EDAF80/phong.frag" } },
-											phong_shader );
-	if(phong_shader == 0u) {
-		LogError( "Failed to load phong shader" );
-		return;
-	}
+	setup_program_manager();
 
 	/* --------------------------------- Load  geometry ---------------------------------------*/
 
