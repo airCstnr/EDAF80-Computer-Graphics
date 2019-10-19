@@ -153,7 +153,7 @@ edaf80::Assignment5::run()
 
 	/* --------------------------------- Set up uniforms ---------------------------------------*/
 
-	auto light_position = glm::vec3(-2.0f, 4.0f, 2.0f);
+	auto light_position = glm::vec3(-2.0f, 40.0f, 2.0f);
 	auto camera_position = mCamera.mWorld.GetTranslation();
 	auto time = 0.0f;
 	auto const set_uniforms = [&light_position, &camera_position, &time](GLuint program) {
