@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "core/Bonobo.h"
 #include "core/FPSCamera.h"
+#include "core/helpers.hpp"
 #include "core/Misc.h"
 
 #include <imgui.h>
@@ -12,6 +13,7 @@
 #include <stdexcept>
 
 #include "parametric_shapes.hpp"
+#include "core/node.hpp"
 #include <glm/gtc/type_ptr.hpp>
 #include "interpolation.hpp"
 
@@ -102,121 +104,6 @@ void edaf80::Assignment5::setup_program_manager()
 	}
 }
 
-void edaf80::Assignment5::setup_meshes()
-{
-	// Load the quad shape for water geometry
-	_water_shape = parametric_shapes::createQuadTess( 200u, 200u, 100u );
-	if(_water_shape.vao == 0u) {
-		LogError( "Failed to retrieve the shape mesh" );
-		return;
-	}
-
-	// Load the sphere shape for sky box
-	_sky_shape = parametric_shapes::createSphere( 24, 20, 500 );
-	if(_sky_shape.vao == 0u) {
-		LogError( "Failed to retrieve the shape mesh" );
-		return;
-	}
-
-	// Load Dory Object
-	std::vector<bonobo::mesh_data> const dory_object = bonobo::loadObjects( "dory.obj" );
-	if(dory_object.empty()) {
-		LogError( "Failed to load the dory model" );
-		return;
-	}
-	_dory_shape = dory_object.front();
-
-	// Load mine
-	std::vector<bonobo::mesh_data> const mine_object = bonobo::loadObjects( "mine.obj" );
-	if(mine_object.empty()) {
-		LogError( "Failed to load the mine model" );
-		return;
-	}
-	_mine_shape = mine_object.front();
-
-	// Load nemo
-	std::vector<bonobo::mesh_data> const nemo_object = bonobo::loadObjects( "nemo.obj" );
-	if(nemo_object.empty()) {
-		LogError( "Failed to load the nemo model" );
-		return;
-	}
-	_nemo_shape = nemo_object.front();
-
-}
-
-void edaf80::Assignment5::setup_uniforms()
-{
-	auto light_position = glm::vec3( -2.0f, 40.0f, 2.0f );
-	auto camera_position = _camera.mWorld.GetTranslation();
-	auto time = _time;
-	_simple_set_uniforms = [&light_position, &camera_position, &time]( GLuint program ) {
-		glUniform3fv( glGetUniformLocation( program, "light_position" ), 1, glm::value_ptr( light_position ) );
-		glUniform3fv( glGetUniformLocation( program, "camera_position" ), 1, glm::value_ptr( camera_position ) );
-		glUniform1f( glGetUniformLocation( program, "time" ), time );
-	};
-
-	auto ambient = glm::vec3( 0.2f, 0.2f, 0.2f );
-	auto diffuse = glm::vec3( 0.1f, 0.1f, 0.4f );
-	auto specular = glm::vec3( 1.0f, 1.0f, 1.0f );
-	auto shininess = 1.0f;
-	_phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess]( GLuint program ) {
-		glUniform3fv( glGetUniformLocation( program, "light_position" ), 1, glm::value_ptr( light_position ) );
-		glUniform3fv( glGetUniformLocation( program, "camera_position" ), 1, glm::value_ptr( camera_position ) );
-		glUniform3fv( glGetUniformLocation( program, "ambient" ), 1, glm::value_ptr( ambient ) );
-		glUniform3fv( glGetUniformLocation( program, "diffuse" ), 1, glm::value_ptr( diffuse ) );
-		glUniform3fv( glGetUniformLocation( program, "specular" ), 1, glm::value_ptr( specular ) );
-		glUniform1f( glGetUniformLocation( program, "shininess" ), shininess );
-	};
-
-	auto nemo_ambient = glm::vec3( (252 / 255), (140 / 255), (3 / 255) );
-	auto nemo_diffuse = glm::vec3( 0.9f, 0.3f, 0.1f );
-	auto nemo_specular = glm::vec3( 1.0f, 1.0f, 1.0f );
-	auto nemo_shininess = 2.0f;
-	_nemo_set_uniforms = [&light_position, &camera_position, &nemo_ambient, &nemo_diffuse, &nemo_specular, &nemo_shininess]( GLuint program ) {
-		glUniform3fv( glGetUniformLocation( program, "light_position" ), 1, glm::value_ptr( light_position ) );
-		glUniform3fv( glGetUniformLocation( program, "camera_position" ), 1, glm::value_ptr( camera_position ) );
-		glUniform3fv( glGetUniformLocation( program, "ambient" ), 1, glm::value_ptr( nemo_ambient ) );
-		glUniform3fv( glGetUniformLocation( program, "diffuse" ), 1, glm::value_ptr( nemo_diffuse ) );
-		glUniform3fv( glGetUniformLocation( program, "specular" ), 1, glm::value_ptr( nemo_specular ) );
-		glUniform1f( glGetUniformLocation( program, "shininess" ), nemo_shininess );
-	};
-}
-
-void edaf80::Assignment5::setup_nodes()
-{
-	// Set up node for water
-	_water_node.set_geometry( _water_shape );
-	_water_node.set_program( &_water_shader, _simple_set_uniforms );
-	// Translate waves to set them at the center of the skybox
-	_water_node.get_transform().SetTranslate( glm::vec3( -100, 0, -100 ) );
-
-	// Set up node for skybox
-	_sky_node.set_geometry( _sky_shape );
-	_sky_node.set_program( &_skybox_shader, _simple_set_uniforms );
-
-	// Set up node for dory
-	_dory_node.set_geometry( _dory_shape );
-	_dory_node.set_program( &_dory_shader, _simple_set_uniforms );
-	// Translate dory to set her in front of me
-	_dory_node.get_transform().SetTranslate( glm::vec3( 0, -15, -20 ) );
-	// dory has to look in the same direction than me
-	_dory_node.get_transform().RotateX( glm::half_pi<float>() );
-	_dory_node.get_transform().RotateZ( glm::pi<float>() );
-
-	// Set up node for mine
-	_mine_node.set_geometry( _mine_shape );
-	_mine_node.set_program( &_phong_shader, _phong_set_uniforms );
-	_mine_node.get_transform().SetScale( 0.1 );
-	_mine_node.get_transform().SetTranslate( glm::vec3( 20, -15, -20 ) );
-
-	// Set up node for nemo
-	_nemo_node.set_geometry( _nemo_shape );
-	_nemo_node.set_program( &_phong_shader, _nemo_set_uniforms );
-	_nemo_node.get_transform().SetScale( 0.1 );
-	_nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -15, -10 ) );
-	_nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
-}
-
 
 /* Returns step vector for next position
  * @param path position
@@ -265,13 +152,123 @@ edaf80::Assignment5::run()
 	setup_program_manager();
 
 	/* --------------------------------- Load  geometry ---------------------------------------*/
-	setup_meshes();
+
+	// Load the quad shape for water geometry
+	auto const water_shape = parametric_shapes::createQuadTess(200u, 200u, 100u);
+	if (water_shape.vao == 0u) {
+		LogError("Failed to retrieve the shape mesh");
+		return;
+	}
+
+	// Load the sphere shape for sky box
+	auto const sky_shape = parametric_shapes::createSphere(24, 20, 500);
+	if (sky_shape.vao == 0u) {
+		LogError("Failed to retrieve the shape mesh");
+		return;
+	}
+
+
+	/* --------------------------------- Load  models  ---------------------------------------*/
+	// Load Dory
+	std::vector<bonobo::mesh_data> const dory_object = bonobo::loadObjects("dory.obj");
+	if (dory_object.empty()) {
+		LogError("Failed to load the dory model");
+		return;
+	}
+	bonobo::mesh_data const& dory = dory_object.front();
+
+	// Load mine
+	std::vector<bonobo::mesh_data> const mine_object = bonobo::loadObjects( "mine.obj" );
+	if(mine_object.empty()) {
+		LogError( "Failed to load the mine model" );
+		return;
+	}
+	bonobo::mesh_data const& mine = mine_object.front();
+
+	// Load nemo
+	std::vector<bonobo::mesh_data> const nemo_object = bonobo::loadObjects( "nemo.obj" );
+	if(nemo_object.empty()) {
+		LogError( "Failed to load the nemo model" );
+		return;
+	}
+	bonobo::mesh_data const& nemo = nemo_object.front();
 
 	/* --------------------------------- Set up uniforms ---------------------------------------*/
-	setup_uniforms();
+
+	auto light_position = glm::vec3(-2.0f, 40.0f, 2.0f);
+	auto camera_position = _camera.mWorld.GetTranslation();
+	auto time = 0.0f;
+	auto const set_uniforms = [&light_position, &camera_position, &time](GLuint program) {
+		glUniform3fv(glGetUniformLocation(program, "light_position"), 1, glm::value_ptr(light_position));
+		glUniform3fv(glGetUniformLocation(program, "camera_position"), 1, glm::value_ptr(camera_position));
+		glUniform1f(glGetUniformLocation(program, "time"), time);
+	};
+
+	auto ambient = glm::vec3( 0.2f, 0.2f, 0.2f );
+	auto diffuse = glm::vec3( 0.1f, 0.1f, 0.4f );
+	auto specular = glm::vec3( 1.0f, 1.0f, 1.0f );
+	auto shininess = 1.0f;
+	auto const phong_set_uniforms = [&light_position, &camera_position, &ambient, &diffuse, &specular, &shininess]( GLuint program ) {
+		glUniform3fv( glGetUniformLocation( program, "light_position" ), 1, glm::value_ptr( light_position ) );
+		glUniform3fv( glGetUniformLocation( program, "camera_position" ), 1, glm::value_ptr( camera_position ) );
+		glUniform3fv( glGetUniformLocation( program, "ambient" ), 1, glm::value_ptr( ambient ) );
+		glUniform3fv( glGetUniformLocation( program, "diffuse" ), 1, glm::value_ptr( diffuse ) );
+		glUniform3fv( glGetUniformLocation( program, "specular" ), 1, glm::value_ptr( specular ) );
+		glUniform1f( glGetUniformLocation( program, "shininess" ), shininess );
+	};
+
+	auto nemo_ambient = glm::vec3( (252/255), (140/255), (3/255) );
+	auto nemo_diffuse = glm::vec3( 0.9f, 0.3f, 0.1f );
+	auto nemo_specular = glm::vec3( 1.0f, 1.0f, 1.0f );
+	auto nemo_shininess = 2.0f;
+	auto const nemo_set_uniforms = [&light_position, &camera_position, &nemo_ambient, &nemo_diffuse, &nemo_specular, &nemo_shininess]( GLuint program ) {
+		glUniform3fv( glGetUniformLocation( program, "light_position" ), 1, glm::value_ptr( light_position ) );
+		glUniform3fv( glGetUniformLocation( program, "camera_position" ), 1, glm::value_ptr( camera_position ) );
+		glUniform3fv( glGetUniformLocation( program, "ambient" ), 1, glm::value_ptr( nemo_ambient ) );
+		glUniform3fv( glGetUniformLocation( program, "diffuse" ), 1, glm::value_ptr( nemo_diffuse ) );
+		glUniform3fv( glGetUniformLocation( program, "specular" ), 1, glm::value_ptr( nemo_specular ) );
+		glUniform1f( glGetUniformLocation( program, "shininess" ), nemo_shininess );
+	};
 
 	/* --------------------------------- Set up nodes ---------------------------------------*/
-	setup_nodes();
+
+	// Set up node for water
+	auto water_node = Node();
+	water_node.set_geometry(water_shape);
+	water_node.set_program(&_water_shader, set_uniforms);
+	// Translate waves to set them at the center of the skybox
+	water_node.get_transform().SetTranslate(glm::vec3(-100, 0, -100));
+
+	// Set up node for skybox
+	auto sky_node = Node();
+	sky_node.set_geometry(sky_shape);
+	sky_node.set_program(&_skybox_shader, set_uniforms);
+
+	// Set up node for dory
+	auto dory_node = Node();
+	dory_node.set_geometry(dory);
+	dory_node.set_program(&_dory_shader, set_uniforms);
+	// Translate dory to set her in front of me
+	dory_node.get_transform().SetTranslate( glm::vec3( 0, -15, -20 ) );
+	// dory has to look in the same direction than me
+	dory_node.get_transform().RotateX( glm::half_pi<float>() );
+	dory_node.get_transform().RotateZ( glm::pi<float>() );
+
+	// Set up node for mine
+	auto mine_node = Node();
+	mine_node.set_geometry( mine );
+	mine_node.set_program( &_phong_shader, phong_set_uniforms );
+	mine_node.get_transform().SetScale( 0.1 );
+	mine_node.get_transform().SetTranslate( glm::vec3( 20, -15, -20 ) );
+
+	// Set up node for nemo
+	auto nemo_node = Node();
+	nemo_node.set_geometry( nemo );
+	nemo_node.set_program( &_phong_shader, nemo_set_uniforms );
+	nemo_node.get_transform().SetScale( 0.1 );
+	nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -15, -10 ) );
+	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
+
 
 	/* --------------------------------- Load textures ---------------------------------------*/
 
@@ -282,16 +279,16 @@ edaf80::Assignment5::run()
 		true);
 
 	// Add cube map to current node
-	_sky_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
-	_water_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
+	sky_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
+	water_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
 
 	// For wave ripples
 	GLuint const wave_ripple_texture = bonobo::loadTexture2D("waves.png");
-	_water_node.add_texture("wave_ripple_texture", wave_ripple_texture, GL_TEXTURE_2D);
+	water_node.add_texture("wave_ripple_texture", wave_ripple_texture, GL_TEXTURE_2D);
 
 	// Load dory texture
 	GLuint const dory_texture = bonobo::loadTexture2D("dory_texture.jpg");
-	_dory_node.add_texture("dory_texture", dory_texture, GL_TEXTURE_2D);
+	dory_node.add_texture("dory_texture", dory_texture, GL_TEXTURE_2D);
 
 
 	/* --------------------------------- Motion management ---------------------------------------*/
@@ -349,7 +346,7 @@ edaf80::Assignment5::run()
 		fpsSamples++;
 
 		// Increment time for waves movement
-		_time += 0.01;
+		time += 0.01;
 
 		auto& io = ImGui::GetIO();
 		_inputHandler.SetUICapture(io.WantCaptureMouse, io.WantCaptureKeyboard);
@@ -386,10 +383,10 @@ edaf80::Assignment5::run()
 			// translate dory of one step
 			glm::vec3 step = get_step( dory_path_pos, dory_path_vector ); // get step
 			step = glm::normalize( step ) * dory_velocity; // make this step proportional to velocity
-			_dory_node.get_transform().Translate( step ); // apply step
+			dory_node.get_transform().Translate( step ); // apply step
 			// dory looks in her translation direction!
-			_dory_node.get_transform().RotateX( glm::dot( step, glm::vec3( 0, 1, 0 ) ) * dory_velocity );
-			_dory_node.get_transform().RotateY( glm::dot( step, _dory_node.get_transform().GetBack() ) * dory_velocity );
+			dory_node.get_transform().RotateX( glm::dot( step, glm::vec3( 0, 1, 0 ) ) * dory_velocity );
+			dory_node.get_transform().RotateY( glm::dot( step, dory_node.get_transform().GetBack() ) * dory_velocity );
 			// increase dory postion using her velocity
 			dory_path_pos += dory_velocity;
 		}
@@ -407,11 +404,11 @@ edaf80::Assignment5::run()
 			//
 			// Render all geometries
 			//
-			_water_node.render(_camera.GetWorldToClipMatrix());
-			_sky_node.render(_camera.GetWorldToClipMatrix());
-			_dory_node.render(_camera.GetWorldToClipMatrix());
-			_mine_node.render( _camera.GetWorldToClipMatrix() );
-			_nemo_node.render( _camera.GetWorldToClipMatrix(), _camera.mWorld.GetTranslationMatrix() );
+			water_node.render(_camera.GetWorldToClipMatrix());
+			sky_node.render(_camera.GetWorldToClipMatrix());
+			dory_node.render(_camera.GetWorldToClipMatrix());
+			mine_node.render( _camera.GetWorldToClipMatrix() );
+			nemo_node.render( _camera.GetWorldToClipMatrix(), _camera.mWorld.GetTranslationMatrix() );
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -435,8 +432,6 @@ edaf80::Assignment5::run()
 	}
 }
 
-
-///////////////////////////////////////////////////////////////////////
 int main()
 {
 	Bonobo framework;
