@@ -137,3 +137,26 @@ Node::get_transform()
 {
 	return _transform;
 }
+
+void Node::set_hitbox_radius( float radius )
+{
+	_hitbox_radius = radius;
+}
+
+float Node::get_hitbox_radius() const
+{
+	return _hitbox_radius;
+}
+
+bool Node::hits( Node other ) const
+{
+	if(_hitbox_radius > 0 && other.get_hitbox_radius() > 0) {
+		float distance =
+			pow( (get_transform().GetTranslation()[0] - other.get_transform().GetTranslation()[0]), 2 ) +
+			pow( (get_transform().GetTranslation()[1] - other.get_transform().GetTranslation()[1]), 2 ) +
+			pow( (get_transform().GetTranslation()[2] - other.get_transform().GetTranslation()[2]), 2 );
+		distance = sqrt( distance );
+		return distance < _hitbox_radius+other.get_hitbox_radius();
+	}
+	return false;
+}
