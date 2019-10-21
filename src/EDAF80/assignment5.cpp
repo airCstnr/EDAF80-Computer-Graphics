@@ -256,12 +256,20 @@ edaf80::Assignment5::run()
 	dory_node.set_hitbox_radius( 10 );
 
 	// Set up node for mine
-	auto mine_node = Node();
-	mine_node.set_geometry( mine );
-	mine_node.set_program( &_phong_shader, phong_set_uniforms );
-	mine_node.get_transform().SetScale( 0.1 );
-	mine_node.get_transform().SetTranslate( glm::vec3( 20, -15, -20 ) );
-	mine_node.set_hitbox_radius( 10 );
+	int mines_number = 20;
+	int x_value = 1;
+	std::vector<Node> mine_node_vector = std::vector<Node>(mines_number);
+	for(size_t i = 1; i < mines_number; i++)
+	{
+		auto mine_node = Node();
+		mine_node.set_geometry( mine );
+		mine_node.set_program( &_phong_shader, phong_set_uniforms );
+		mine_node.get_transform().SetScale( 0.1 );
+		mine_node.get_transform().SetTranslate( glm::vec3( 20*x_value + 5*cos(i), -15 + 3*sin(i), -(20*(float)i) ) );
+		mine_node.set_hitbox_radius( 10 );
+		mine_node_vector.push_back( mine_node );
+		x_value *= -1;
+	}
 
 	// Set up node for nemo
 	auto nemo_node = Node();
@@ -383,19 +391,18 @@ edaf80::Assignment5::run()
 			}
 
 			// Update game state according to hitboxes (mine)
-			if (nemo_node.hits(mine_node) ) {
-				std::cerr << "You failed hitting a mine!" << std::endl;
-				_game_state = game_state::game_over;
+			for (Node mine_node : mine_node_vector) {
+				if (nemo_node.hits(mine_node)) {
+					std::cerr << "You failed hitting a mine!" << std::endl;
+					_game_state = game_state::game_over;
+				}
 			}
-
 			// Update the game after
 			if (nowTime - startTime > 60000) {
 				std::cerr << "You win! You followed Dory all the way!" << std::endl;
 				_game_state = game_state::game_over;
 			}
-
 		}
-
 		// Update variables according to game state
 		switch(_game_state)
 		{
@@ -475,7 +482,9 @@ edaf80::Assignment5::run()
 			water_node.render(_camera.GetWorldToClipMatrix());
 			sky_node.render(_camera.GetWorldToClipMatrix());
 			dory_node.render(_camera.GetWorldToClipMatrix());
-			mine_node.render( _camera.GetWorldToClipMatrix() );
+			for(Node mine_node : mine_node_vector) {
+				mine_node.render( _camera.GetWorldToClipMatrix() );
+			}
 			nemo_node.render( _camera.GetWorldToClipMatrix() );
 		}
 
