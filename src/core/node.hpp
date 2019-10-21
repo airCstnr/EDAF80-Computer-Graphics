@@ -108,6 +108,16 @@ public:
 	TRSTransformf const& get_transform() const;
 	TRSTransformf& get_transform();
 
+	//! \brief Hitbox radius for this object
+	void set_hitbox_radius( float radius );
+	float get_hitbox_radius() const;
+
+	//! \brief Returns true if this Node hits the other Node
+	bool hits( Node other ) const;
+
+	//! \brief Return the difference between Nemo and Dory
+	float distance(Node other) const;
+
 private:
 	// Geometry data
 	GLuint _vao;
@@ -128,4 +138,7 @@ private:
 
 	// Children data
 	std::vector<Node const*> _children;
+
+	// Hitbox
+	float _hitbox_radius = -1;
 };
