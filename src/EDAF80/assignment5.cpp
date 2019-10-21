@@ -322,21 +322,28 @@ edaf80::Assignment5::run()
 
 	f64 ddeltatime;
 	size_t fpsSamples = 0;
-	double nowTime, lastTime = GetTimeMilliseconds();
+	double nowTime;
+	double lastTime = GetTimeMilliseconds();
+	double startTime = GetTimeMilliseconds();
 	double fpsNextTick = lastTime + 1000.0;
 
 	/* --------------------------------- Log Windows Parameters ---------------------------------------*/
 
 	bool show_logs = false;
-	bool show_gui = false;
+	bool show_gui = true;
 	bool shader_reload_failed = false;
 
 	auto polygon_mode = bonobo::polygon_mode_t::fill;
 
+	/* --------------------------------- Setup game state ---------------------------------------*/
+	_game_state = game_state::begin; // when starting game, the state is "begin"
+	enable_dory_motion = false; // dory is stopped
 
 	/* --------------------------------- Render loop ---------------------------------------*/
 
 	while (!glfwWindowShouldClose(_window)) {
+
+		// handle time between two frames
 		nowTime = GetTimeMilliseconds();
 		ddeltatime = nowTime - lastTime;
 		if (nowTime > fpsNextTick) {
@@ -347,6 +354,29 @@ edaf80::Assignment5::run()
 
 		// Increment time for waves movement
 		time += 0.01;
+
+		// Update game state after 3 seconds
+		if(nowTime - startTime > 3000) {
+			std::cerr << nowTime - startTime << std::endl;
+			_game_state = game_state::play;
+		}
+
+		// Update variables according to game state
+		switch(_game_state)
+		{
+			case edaf80::Assignment5::begin:
+				enable_dory_motion = false;
+				break;
+			case edaf80::Assignment5::play:
+				enable_dory_motion = true;
+				break;
+			case edaf80::Assignment5::game_over:
+				enable_dory_motion = false;
+				break;
+			default:
+				// do nothing
+				break;
+		}
 
 		auto& io = ImGui::GetIO();
 		_inputHandler.SetUICapture(io.WantCaptureMouse, io.WantCaptureKeyboard);
@@ -416,9 +446,18 @@ edaf80::Assignment5::run()
 		//
 		// custom ImGUI window
 		//
-		bool opened = ImGui::Begin( "Scene Control", &opened, ImVec2( 300, 100 ), -1.0f, 0 );
-		if(opened) {
-			bonobo::uiSelectPolygonMode( "Polygon mode", polygon_mode );
+		//bool opened = ImGui::Begin( "Scene Control", &opened, ImVec2( 300, 100 ), -1.0f, 0 );
+		//if(opened) {
+		//	bonobo::uiSelectPolygonMode( "Polygon mode", polygon_mode );
+		//}
+		//ImGui::End();
+
+		bool game_stats = ImGui::Begin( "Game Stats", &game_stats, ImVec2( 300, 100 ), -1.0f, 0 );
+		if(game_stats) {
+			ImGui::Text( "Distance : %.0f cm", dory_path_pos );
+			ImGui::Text( "Time : %.0f s" , time);
+			// TODO : print best score?
+			//ImGui::Text( "Best Score: " );
 		}
 		ImGui::End();
 
@@ -426,6 +465,7 @@ edaf80::Assignment5::run()
 			Log::View::Render();
 		if (show_gui)
 			ImGui::Render();
+
 
 		glfwSwapBuffers(_window);
 		lastTime = nowTime;

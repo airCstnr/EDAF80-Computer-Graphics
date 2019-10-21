@@ -32,6 +32,12 @@ namespace edaf80
 		glm::vec3 get_step( float path_pos,
 							std::vector<glm::vec3>& path );
 
+		enum game_state {
+			begin,		//! State for beginning of the game
+			play,		//! State for playing the game
+			game_over,	//! State for end of the game
+		};
+
 		//! \brief Contains the logic of the assignment, along with the
 		//! render loop.
 		void run();
@@ -42,6 +48,7 @@ namespace edaf80
 		WindowManager& _windowManager;
 		GLFWwindow*    _window;
 		ShaderProgramManager _program_manager;
+		game_state _game_state;
 
 		// Shaders identifiers
 		GLuint _texcoord_shader;
@@ -50,5 +57,7 @@ namespace edaf80
 		GLuint _water_shader;
 		GLuint _skybox_shader;
 		GLuint _phong_shader;
+
+
 	};
 }
