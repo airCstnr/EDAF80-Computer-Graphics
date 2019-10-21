@@ -367,6 +367,16 @@ edaf80::Assignment5::run()
 			_game_state = game_state::play;
 		}
 
+		// Update game state according to hitboxes
+		if(nemo_node.hits( dory_node )) {
+			std::cerr << "You failed hitting Dory!" << std::endl;
+			_game_state = game_state::game_over;
+		}
+		if(nemo_node.hits( mine_node )) {
+			std::cerr << "You failed hitting a mine!" << std::endl;
+			_game_state = game_state::game_over;
+		}
+
 		// Update variables according to game state
 		switch(_game_state)
 		{
