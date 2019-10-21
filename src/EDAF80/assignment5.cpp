@@ -17,9 +17,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "interpolation.hpp"
 
-
 using namespace edaf80;
-
 
 Assignment5::Assignment5( WindowManager& windowManager ) :
 	_camera( 0.5f * glm::half_pi<float>(),
@@ -362,6 +360,8 @@ edaf80::Assignment5::run()
 			_game_state = game_state::play;
 		}
 
+
+
 		// Update variables according to game state
 		switch(_game_state)
 		{
@@ -455,6 +455,11 @@ edaf80::Assignment5::run()
 
 		bool game_stats = ImGui::Begin( "Game Stats", &game_stats, ImVec2( 300, 100 ), -1.0f, 0 );
 		if(game_stats) {
+			ImGui::Text("Dory has finally learned the address to Marvin");
+			ImGui::Text("But now she is in a hurry");
+			ImGui::Text("Try to keep up and avoid any mines along the way");
+			ImGui::Text("The game will start in 3 seconds");
+			ImGui::Text("Press space to pause");
 			ImGui::Text( "Distance : %.0f cm", dory_path_pos );
 			ImGui::Text( "Time : %.0f s" , time);
 			// TODO : print best score?
