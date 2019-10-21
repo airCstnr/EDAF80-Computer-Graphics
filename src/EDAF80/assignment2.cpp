@@ -32,6 +32,90 @@ edaf80::Assignment2::Assignment2(WindowManager& windowManager) :
 	}
 }
 
+glm::vec3 getStep( bool use_linear,
+				   int& current_point_index,
+				   float& path_pos,
+				   int& next_point_index,
+				   float& distance_ratio,
+				   std::vector<glm::vec3>& interpolation_path,
+				   int& next2_point_index,
+				   int& previous_point_index,
+				   float& catmull_rom_tension
+				   ) {
+	if(use_linear) {
+		current_point_index = floor( path_pos );
+		next_point_index = current_point_index + 1;
+		distance_ratio = path_pos - current_point_index;
+
+		// manage path circularity
+		if(current_point_index == interpolation_path.size() - 1)
+		{
+			next_point_index = 0;
+		}
+		if(current_point_index == interpolation_path.size())
+		{
+			current_point_index = 0;
+			next_point_index = 1;
+			path_pos = 0;
+		}
+
+		// compute linear translation 
+		glm::vec3 p_step = interpolation::evalLERP( interpolation_path[current_point_index],
+													interpolation_path[next_point_index],
+													distance_ratio );
+
+		// set translation interpolatewd along the path
+		return p_step;
+
+	}
+	else {
+		//!		 Compute the interpolated position
+		//!       using the Catmull-Rom interpolation;
+		//!       use the `catmull_rom_tension`
+		//!       variable as your tension argument.
+
+		current_point_index = floor( path_pos );
+		next_point_index = current_point_index + 1;
+		next2_point_index = current_point_index + 2;
+		previous_point_index = current_point_index - 1;
+		distance_ratio = path_pos - current_point_index;
+
+		// manage path circularity
+		if(current_point_index == interpolation_path.size() - 2)
+		{
+			next2_point_index = 0;
+		}
+		if(current_point_index == interpolation_path.size() - 1)
+		{
+			next_point_index = 0;
+			next2_point_index = 1;
+		}
+		if(current_point_index == interpolation_path.size())
+		{
+			current_point_index = 0;
+			next_point_index = 1;
+			next2_point_index = 2;
+			path_pos = 0;
+		}
+		if(current_point_index == 0)
+		{
+			previous_point_index = interpolation_path.size() - 1;
+		}
+
+		// compute linear translation 
+		glm::vec3 q_step = interpolation::evalCatmullRom( interpolation_path[previous_point_index],
+															interpolation_path[current_point_index],
+															interpolation_path[next_point_index],
+															interpolation_path[next2_point_index],
+															catmull_rom_tension,
+															distance_ratio );
+
+		// set translation interpolatewd along the path
+		return q_step;
+
+	}
+}
+
 void
 edaf80::Assignment2::run()
 {
@@ -126,7 +210,7 @@ edaf80::Assignment2::run()
 
 	// Set whether to interpolate the position of an object or not; it can
 	// always be changed at runtime through the "Scene Controls" window.
-	bool interpolate = false;
+	bool interpolate = true;
 
 	// Set up node for the selected geometry
 	auto geometry_node = Node();
@@ -154,8 +238,8 @@ edaf80::Assignment2::run()
 
 	std::int32_t program_index = 0;
 	auto polygon_mode = bonobo::polygon_mode_t::fill;
-	bool show_logs = true;
-	bool show_gui = true;
+	bool show_logs = false;
+	bool show_gui = false;
 
 	// Create random path
 	size_t path_length( 5 ); // number of points in the path
@@ -202,80 +286,15 @@ edaf80::Assignment2::run()
 
 		if (interpolate) {
 			// Interpolate the movement of a shape between various control points
-
-			if (use_linear) {
-				current_point_index = floor(path_pos);
-				next_point_index = current_point_index + 1;
-				distance_ratio = path_pos - current_point_index;
-
-				// manage path circularity
-				if (current_point_index == interpolation_path.size() - 1)
-				{
-					next_point_index = 0;
-				}
-				if (current_point_index == interpolation_path.size())
-				{
-					current_point_index = 0;
-					next_point_index = 1;
-					path_pos = 0;
-				}
-
-				// compute linear translation 
-				glm::vec3 p_step = interpolation::evalLERP(	interpolation_path[current_point_index],
-															interpolation_path[next_point_index],
-															distance_ratio);
-
-				// set translation interpolatewd along the path
-				geometry_transform_ref.SetTranslate(p_step);				
-
-			}
-			else {
-				//!		 Compute the interpolated position
-				//!       using the Catmull-Rom interpolation;
-				//!       use the `catmull_rom_tension`
-				//!       variable as your tension argument.
-
-				current_point_index = floor(path_pos);
-				next_point_index = current_point_index + 1;
-				next2_point_index = current_point_index + 2;
-				previous_point_index = current_point_index - 1;
-				distance_ratio = path_pos - current_point_index;
-
-				// manage path circularity
-				if (current_point_index == interpolation_path.size() - 2)
-				{
-					next2_point_index = 0;
-				}
-				if (current_point_index == interpolation_path.size() - 1)
-				{
-					next_point_index = 0;
-					next2_point_index = 1;
-				}
-				if (current_point_index == interpolation_path.size())
-				{
-					current_point_index = 0;
-					next_point_index = 1;
-					next2_point_index = 2;
-					path_pos = 0;
-				}
-				if (current_point_index == 0)
-				{
-					previous_point_index = interpolation_path.size() - 1;
-				}
-
-				// compute linear translation 
-				glm::vec3 q_step = interpolation::evalCatmullRom(	interpolation_path[previous_point_index],
-																	interpolation_path[current_point_index],
-																	interpolation_path[next_point_index],
-																	interpolation_path[next2_point_index],
-																	catmull_rom_tension,
-																	distance_ratio);
-
-				// set translation interpolatewd along the path
-				geometry_transform_ref.SetTranslate(q_step);
-
-			}
-
+			geometry_transform_ref.SetTranslate( getStep( use_linear,
+														  current_point_index,
+														  path_pos,
+														  next_point_index,
+														  distance_ratio,
+														  interpolation_path,
+														  next2_point_index,
+														  previous_point_index,
+														  catmull_rom_tension ) );
 			path_pos += pos_velocity;
 		}
 
