@@ -4,6 +4,7 @@
 #include "core/FPSCamera.h"
 #include "core/WindowManager.hpp"
 
+#include "core/ShaderProgramManager.hpp"
 
 class Window;
 
@@ -25,14 +26,29 @@ namespace edaf80
 		//! constructor, as well as the window.
 		~Assignment5() = default;
 
+		void setup_camera();
+		void setup_program_manager();
+
+		glm::vec3 get_step( float path_pos,
+							std::vector<glm::vec3>& path );
+
 		//! \brief Contains the logic of the assignment, along with the
 		//! render loop.
 		void run();
 
 	private:
-		FPSCameraf     mCamera;
-		InputHandler   inputHandler;
-		WindowManager& mWindowManager;
-		GLFWwindow*    window;
+		FPSCameraf     _camera;
+		InputHandler   _inputHandler;
+		WindowManager& _windowManager;
+		GLFWwindow*    _window;
+		ShaderProgramManager _program_manager;
+
+		// Shaders identifiers
+		GLuint _texcoord_shader;
+		GLuint _dory_shader;
+		GLuint _fallback_shader;
+		GLuint _water_shader;
+		GLuint _skybox_shader;
+		GLuint _phong_shader;
 	};
 }
