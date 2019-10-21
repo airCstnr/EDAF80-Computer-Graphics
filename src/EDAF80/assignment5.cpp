@@ -501,13 +501,33 @@ edaf80::Assignment5::run()
 
 		bool game_stats = ImGui::Begin( "Game Stats", &game_stats, ImVec2( 300, 100 ), -1.0f, 0 );
 		if(game_stats) {
+			/*
+			This text should be rendered on screen before the game starts and not in GUI
+			Not sure if GLUT is needed or there is some other way
 			ImGui::Text("Dory has finally learned the address to Marvin");
 			ImGui::Text("But now she is in a hurry");
 			ImGui::Text("Try to keep up and avoid any mines along the way");
 			ImGui::Text("The game will start in 3 seconds");
-			ImGui::Text("Press space to pause");
-			ImGui::Text( "Distance : %.0f cm", dory_path_pos );
-			ImGui::Text( "Time : %.0f s" , time);
+			*/
+			if (_game_state == game_state::begin) {
+				ImGui::Text("Get ready!");
+				ImGui::Text("Distance : %.0f cm", dory_path_pos);
+				ImGui::Text("Time : %.0f s", time);
+			}
+			if (_game_state == game_state::play) {
+				if (nemo_node.distance(dory_node) < 75) {
+					ImGui::Text("Keep going, you're doing great!");
+				}
+				else {
+					ImGui::Text("Dory is getting away, hurry up!");
+				}
+				ImGui::Text("Distance : %.0f cm", dory_path_pos);
+				ImGui::Text("Time : %.0f s", time);
+			}
+			if (_game_state == game_state::game_over) {
+				ImGui::Text("Good try, you will make it next time!");
+			}
+
 			// TODO : print best score?
 			//ImGui::Text( "Best Score: " );
 		}
