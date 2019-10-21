@@ -258,7 +258,7 @@ edaf80::Assignment5::run()
 	dory_node.set_hitbox_radius( 10 );
 
 	// Set up node for mine
-	int mines_number = 10;
+	int mines_number = 20;
 	int x_value = 1;
 	std::vector<Node> mine_node_vector = std::vector<Node>(mines_number);
 	for(size_t i = 1; i < mines_number; i++)
@@ -267,7 +267,7 @@ edaf80::Assignment5::run()
 		mine_node.set_geometry( mine );
 		mine_node.set_program( &_phong_shader, phong_set_uniforms );
 		mine_node.get_transform().SetScale( 0.1 );
-		mine_node.get_transform().SetTranslate( glm::vec3( 20*x_value, -15, -(20*(float)i) ) );
+		mine_node.get_transform().SetTranslate( glm::vec3( 20*x_value + 5*cos(i), -15 + 3*sin(i), -(20*(float)i) ) );
 		mine_node.set_hitbox_radius( 10 );
 		mine_node_vector.push_back( mine_node );
 		x_value *= -1;
