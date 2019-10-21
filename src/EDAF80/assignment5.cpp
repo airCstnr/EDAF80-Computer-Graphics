@@ -259,6 +259,7 @@ edaf80::Assignment5::run()
 
 	// Set up node for mine
 	int mines_number = 10;
+	int x_value = 1;
 	std::vector<Node> mine_node_vector = std::vector<Node>(mines_number);
 	for(size_t i = 1; i < mines_number; i++)
 	{
@@ -266,9 +267,10 @@ edaf80::Assignment5::run()
 		mine_node.set_geometry( mine );
 		mine_node.set_program( &_phong_shader, phong_set_uniforms );
 		mine_node.get_transform().SetScale( 0.1 );
-		mine_node.get_transform().SetTranslate( glm::vec3( 20*i, -15, -(20*(float)i) ) );
+		mine_node.get_transform().SetTranslate( glm::vec3( 20*x_value, -15, -(20*(float)i) ) );
 		mine_node.set_hitbox_radius( 10 );
 		mine_node_vector.push_back( mine_node );
+		x_value *= -1;
 	}
 
 	// Set up node for nemo
