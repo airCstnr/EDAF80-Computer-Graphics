@@ -254,6 +254,8 @@ edaf80::Assignment5::run()
 	// dory has to look in the same direction than me
 	dory_node.get_transform().RotateX( glm::half_pi<float>() );
 	dory_node.get_transform().RotateZ( glm::pi<float>() );
+	// Add hitbox value for Dory
+	dory_node.set_hitbox_radius( 10 );
 
 	// Set up node for mine
 	auto mine_node = Node();
@@ -261,14 +263,17 @@ edaf80::Assignment5::run()
 	mine_node.set_program( &_phong_shader, phong_set_uniforms );
 	mine_node.get_transform().SetScale( 0.1 );
 	mine_node.get_transform().SetTranslate( glm::vec3( 20, -15, -20 ) );
+	mine_node.set_hitbox_radius( 10 );
 
 	// Set up node for nemo
 	auto nemo_node = Node();
 	nemo_node.set_geometry( nemo );
 	nemo_node.set_program( &_phong_shader, nemo_set_uniforms );
 	nemo_node.get_transform().SetScale( 0.1 );
-	nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -15, -10 ) );
+	//nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -15, -10 ) );
+	auto nemo_camera_translation = glm::vec3( -2.5, -15, -10 );
 	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
+	nemo_node.set_hitbox_radius( 5 );
 
 
 	/* --------------------------------- Load textures ---------------------------------------*/
@@ -362,6 +367,16 @@ edaf80::Assignment5::run()
 			_game_state = game_state::play;
 		}
 
+		// Update game state according to hitboxes
+		if(nemo_node.hits( dory_node )) {
+			std::cerr << "You failed hitting Dory!" << std::endl;
+			_game_state = game_state::game_over;
+		}
+		if(nemo_node.hits( mine_node )) {
+			std::cerr << "You failed hitting a mine!" << std::endl;
+			_game_state = game_state::game_over;
+		}
+
 		// Update variables according to game state
 		switch(_game_state)
 		{
@@ -422,6 +437,9 @@ edaf80::Assignment5::run()
 			dory_path_pos += dory_velocity;
 		}
 
+		// Move Nemo
+		nemo_node.get_transform().SetTranslate( _camera.mWorld.GetTranslation() + nemo_camera_translation );
+
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(_window, &framebuffer_width, &framebuffer_height);
 		glViewport(0, 0, framebuffer_width, framebuffer_height);
@@ -439,7 +457,7 @@ edaf80::Assignment5::run()
 			sky_node.render(_camera.GetWorldToClipMatrix());
 			dory_node.render(_camera.GetWorldToClipMatrix());
 			mine_node.render( _camera.GetWorldToClipMatrix() );
-			nemo_node.render( _camera.GetWorldToClipMatrix(), _camera.mWorld.GetTranslationMatrix() );
+			nemo_node.render( _camera.GetWorldToClipMatrix() );
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
