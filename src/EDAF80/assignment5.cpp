@@ -267,7 +267,8 @@ edaf80::Assignment5::run()
 	nemo_node.set_geometry( nemo );
 	nemo_node.set_program( &_phong_shader, nemo_set_uniforms );
 	nemo_node.get_transform().SetScale( 0.1 );
-	nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -15, -10 ) );
+	//nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -15, -10 ) );
+	auto nemo_camera_translation = glm::vec3( -2.5, -15, -10 );
 	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
 
 
@@ -422,6 +423,9 @@ edaf80::Assignment5::run()
 			dory_path_pos += dory_velocity;
 		}
 
+		// Move Nemo
+		nemo_node.get_transform().SetTranslate( _camera.mWorld.GetTranslation() + nemo_camera_translation );
+
 		int framebuffer_width, framebuffer_height;
 		glfwGetFramebufferSize(_window, &framebuffer_width, &framebuffer_height);
 		glViewport(0, 0, framebuffer_width, framebuffer_height);
@@ -439,7 +443,7 @@ edaf80::Assignment5::run()
 			sky_node.render(_camera.GetWorldToClipMatrix());
 			dory_node.render(_camera.GetWorldToClipMatrix());
 			mine_node.render( _camera.GetWorldToClipMatrix() );
-			nemo_node.render( _camera.GetWorldToClipMatrix(), _camera.mWorld.GetTranslationMatrix() );
+			nemo_node.render( _camera.GetWorldToClipMatrix() );
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
