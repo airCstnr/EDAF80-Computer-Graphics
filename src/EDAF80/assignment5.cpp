@@ -362,8 +362,8 @@ edaf80::Assignment5::run()
 		time += 0.01;
 
 		// Update game state after 3 seconds
-		if(nowTime - startTime > 3000) {
-			std::cerr << nowTime - startTime << std::endl;
+		if(nowTime - startTime > 3000 && _game_state==game_state::begin ) {
+			//std::cerr << nowTime - startTime << std::endl;
 			_game_state = game_state::play;
 		}
 
