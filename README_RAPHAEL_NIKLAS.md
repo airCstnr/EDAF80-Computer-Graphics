@@ -28,6 +28,5 @@ Don't loose Dory or  hurt rocks, otherwise you will not find your way.
     TODO : add randomized/generated postion mines into water environment
     TODO : optimize generation to avoid generating objects where Dory is not supposed to go...
 6. Add other fishes?
-7. Add hitboxes to mines
 8. Add water physics (inertia...)
 9. Add particles effects...
