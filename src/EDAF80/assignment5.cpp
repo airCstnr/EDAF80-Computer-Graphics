@@ -40,6 +40,7 @@ Assignment5::Assignment5( WindowManager& windowManager ) :
 
 void edaf80::Assignment5::setup_camera()
 {
+	/* --------------------------------- Setup camera & motion ---------------------------------------*/
 	// Set up the camera
 	_camera.mWorld.SetTranslate( glm::vec3( 0.0f, -10.0f, 0.0f ) ); // set start position underwater
 	_camera.mMouseSensitivity = 0.003f;
