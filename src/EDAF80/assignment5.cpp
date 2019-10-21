@@ -254,6 +254,8 @@ edaf80::Assignment5::run()
 	// dory has to look in the same direction than me
 	dory_node.get_transform().RotateX( glm::half_pi<float>() );
 	dory_node.get_transform().RotateZ( glm::pi<float>() );
+	// Add hitbox value for Dory
+	dory_node.set_hitbox_radius( 10 );
 
 	// Set up node for mine
 	auto mine_node = Node();
@@ -261,6 +263,7 @@ edaf80::Assignment5::run()
 	mine_node.set_program( &_phong_shader, phong_set_uniforms );
 	mine_node.get_transform().SetScale( 0.1 );
 	mine_node.get_transform().SetTranslate( glm::vec3( 20, -15, -20 ) );
+	mine_node.set_hitbox_radius( 10 );
 
 	// Set up node for nemo
 	auto nemo_node = Node();
@@ -270,6 +273,7 @@ edaf80::Assignment5::run()
 	//nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -15, -10 ) );
 	auto nemo_camera_translation = glm::vec3( -2.5, -15, -10 );
 	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
+	nemo_node.set_hitbox_radius( 5 );
 
 
 	/* --------------------------------- Load textures ---------------------------------------*/
