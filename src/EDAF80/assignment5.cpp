@@ -449,7 +449,11 @@ edaf80::Assignment5::run()
 
 		glfwPollEvents();
 		_inputHandler.Advance();
-		_camera.Update(ddeltatime, _inputHandler);
+
+		if(_game_state == game_state::play)
+		{
+			_camera.Update(ddeltatime, _inputHandler);
+		}
 
 		if (_inputHandler.GetKeycodeState(GLFW_KEY_F3) & JUST_RELEASED)
 			show_logs = !show_logs;
@@ -469,7 +473,7 @@ edaf80::Assignment5::run()
 		}
 		if(_inputHandler.GetKeycodeState( GLFW_KEY_SPACE ) & JUST_PRESSED) {
 			// Enable/Disable Dory Motion
-			enable_dory_motion = !enable_dory_motion;
+			//enable_dory_motion = !enable_dory_motion;
 		}
 
 		ImGui_ImplGlfwGL3_NewFrame();
