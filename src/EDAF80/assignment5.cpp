@@ -201,7 +201,7 @@ edaf80::Assignment5::run()
 	bonobo::mesh_data const& mine = mine_object.front();
 
 	// Load nemo
-	std::vector<bonobo::mesh_data> const nemo_object = bonobo::loadObjects( "nemo.obj" );
+	std::vector<bonobo::mesh_data> const nemo_object = bonobo::loadObjects( "nemo.fbx" );
 	if(nemo_object.empty()) {
 		LogError( "Failed to load the nemo model" );
 		return;
