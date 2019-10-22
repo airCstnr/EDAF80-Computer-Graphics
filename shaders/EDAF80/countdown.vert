@@ -10,6 +10,7 @@ out VS_OUT {
 	vec2 texcoord;
 } vs_out;
 
+
 void main()
 {
 	vs_out.texcoord = vec2(texcoord.x, texcoord.y);

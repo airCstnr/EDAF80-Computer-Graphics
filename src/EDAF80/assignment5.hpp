@@ -57,6 +57,7 @@ namespace edaf80
 		GLuint _water_shader;
 		GLuint _skybox_shader;
 		GLuint _phong_shader;
+		GLuint _countdown_shader;
 
 
 	};

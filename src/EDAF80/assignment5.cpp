@@ -101,6 +101,15 @@ void edaf80::Assignment5::setup_program_manager()
 		LogError( "Failed to load phong shader" );
 		return;
 	}
+
+	_program_manager.CreateAndRegisterProgram("Countdown shader ",
+		{ { ShaderType::vertex, "EDAF80/countdown.vert" },
+		{ ShaderType::fragment, "EDAF80/countdown.frag" } },
+		_countdown_shader);
+	if (_countdown_shader == 0u) {
+		LogError("Failed to countdown_shader shader");
+		return;
+	}
 }
 
 
@@ -162,6 +171,13 @@ edaf80::Assignment5::run()
 	// Load the sphere shape for sky box
 	auto const sky_shape = parametric_shapes::createSphere(24, 20, 500);
 	if (sky_shape.vao == 0u) {
+		LogError("Failed to retrieve the shape mesh");
+		return;
+	}
+
+	// Load the quad shape for the countdown
+	auto const quad_shape = parametric_shapes::createQuadTess(10, 10, 10);
+	if (quad_shape.vao == 0u) {
 		LogError("Failed to retrieve the shape mesh");
 		return;
 	}
@@ -281,6 +297,12 @@ edaf80::Assignment5::run()
 	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
 	nemo_node.set_hitbox_radius( 5 );
 
+	// Set up node for quad
+	auto quad_node = Node();
+	quad_node.set_geometry(quad_shape);
+	quad_node.set_program(&_countdown_shader, set_uniforms);
+	quad_node.get_transform().SetTranslate(glm::vec3(0, -13, -20));
+	quad_node.get_transform().RotateX(-glm::half_pi<float>());
 
 	/* --------------------------------- Load textures ---------------------------------------*/
 
@@ -301,6 +323,14 @@ edaf80::Assignment5::run()
 	// Load dory texture
 	GLuint const dory_texture = bonobo::loadTexture2D("dory_texture.jpg");
 	dory_node.add_texture("dory_texture", dory_texture, GL_TEXTURE_2D);
+
+	// Load number texture
+	GLuint const number_three_texture = bonobo::loadTexture2D("three.png");
+	quad_node.add_texture("number_trhee_texture", number_three_texture, GL_TEXTURE_2D);
+	GLuint const number_two_texture = bonobo::loadTexture2D("two.png");
+	quad_node.add_texture("number_two_texture", number_two_texture, GL_TEXTURE_2D);
+	GLuint const number_one_texture = bonobo::loadTexture2D("one.png");
+	quad_node.add_texture("number_one_texture", number_one_texture, GL_TEXTURE_2D);
 
 
 	/* --------------------------------- Motion management ---------------------------------------*/
@@ -486,6 +516,10 @@ edaf80::Assignment5::run()
 				mine_node.render( _camera.GetWorldToClipMatrix() );
 			}
 			nemo_node.render( _camera.GetWorldToClipMatrix() );
+
+			if (_game_state == game_state::begin) {
+				quad_node.render(_camera.GetWorldToClipMatrix());
+			}
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -525,7 +559,12 @@ edaf80::Assignment5::run()
 				ImGui::Text("Time : %.0f s", time);
 			}
 			if (_game_state == game_state::game_over) {
-				ImGui::Text("Good try, you will make it next time!");
+				if (nowTime - startTime > 60000) {
+					ImGui::Text("You win!You followed Dory all the way!");
+				}
+				else {
+					ImGui::Text("Good try, you will make it next time!");
+				}
 			}
 
 			// TODO : print best score?
