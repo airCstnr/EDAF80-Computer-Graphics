@@ -153,6 +153,9 @@ glm::vec3 Assignment5::get_step( float path_pos,
 void
 edaf80::Assignment5::run()
 {
+	// Add absolute seed to randomization
+	srand( time(0) );
+
 	/* --------------------------------- Setup camera & motion ---------------------------------------*/
 	setup_camera();
 
