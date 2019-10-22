@@ -333,6 +333,8 @@ edaf80::Assignment5::run()
 	countdown_node.add_texture("number_two_texture", number_two_texture, GL_TEXTURE_2D);
 	GLuint const number_one_texture = bonobo::loadTexture2D("one.png");
 	countdown_node.add_texture("number_one_texture", number_one_texture, GL_TEXTURE_2D);
+	GLuint const go_texture = bonobo::loadTexture2D( "go.png" );
+	countdown_node.add_texture( "go_texture", go_texture, GL_TEXTURE_2D );
 
 
 	/* --------------------------------- Motion management ---------------------------------------*/
