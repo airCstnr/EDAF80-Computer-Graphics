@@ -324,6 +324,10 @@ edaf80::Assignment5::run()
 	GLuint const dory_texture = bonobo::loadTexture2D("dory_texture.jpg");
 	dory_node.add_texture("dory_texture", dory_texture, GL_TEXTURE_2D);
 
+	// Load nemo texture
+	GLuint const nemo_texture = bonobo::loadTexture2D( "lambert1_Base_Color.png" );
+	nemo_node.add_texture( "dory_texture", nemo_texture, GL_TEXTURE_2D );
+
 	// Load number texture
 	GLuint const number_three_texture = bonobo::loadTexture2D("three.png");
 	quad_node.add_texture("number_trhee_texture", number_three_texture, GL_TEXTURE_2D);
