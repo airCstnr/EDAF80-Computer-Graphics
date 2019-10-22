@@ -290,10 +290,8 @@ edaf80::Assignment5::run()
 	// Set up node for nemo
 	auto nemo_node = Node();
 	nemo_node.set_geometry( nemo );
-	nemo_node.set_program( &_phong_shader, nemo_set_uniforms );
-	nemo_node.get_transform().SetScale( 0.1 );
-	//nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -15, -10 ) );
-	auto nemo_camera_translation = glm::vec3( -2.5, -15, -10 );
+	nemo_node.set_program( &_dory_shader, nemo_set_uniforms );
+	auto nemo_camera_translation = glm::vec3( -1, -7, -10 );
 	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
 	nemo_node.set_hitbox_radius( 5 );
 
