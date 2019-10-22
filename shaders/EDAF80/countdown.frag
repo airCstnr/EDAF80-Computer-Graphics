@@ -19,28 +19,28 @@ void main()
 	// Would look better is changed to ellapsed time
 	float alpha = 1.0f;
 	if (time < .55) {	
-		alpha = texture(number_three_texture, vec2(1.0f - fs_in.texcoord.x, fs_in.texcoord.y)).r;
+		alpha = texture(number_three_texture, vec2(fs_in.texcoord.x, fs_in.texcoord.y)).a;
 		if (alpha == 0.0f)
 			discard;
 		if (alpha != 0.0f)
 			frag_color = texture(number_three_texture, fs_in.texcoord);
 	}
 	else if (0.55 < time && time < 1.1) {
-		alpha = texture(number_two_texture, vec2(1.0f - fs_in.texcoord.x, fs_in.texcoord.y)).r;
+		alpha = texture(number_two_texture, vec2(fs_in.texcoord.x, fs_in.texcoord.y)).a;
 		if (alpha == 0.0f)
 			discard;
 		if (alpha != 0.0f)
 			frag_color = texture(number_two_texture, fs_in.texcoord);
 	}
 	else if (1.1 < time && time < 1.65) {
-		alpha = texture(number_one_texture, vec2(1.0f - fs_in.texcoord.x, fs_in.texcoord.y)).r;
+		alpha = texture(number_one_texture, vec2(fs_in.texcoord.x, fs_in.texcoord.y)).a;
 		if (alpha == 0.0f)
 			discard;
 		if (alpha != 0.0f)
 			frag_color = texture(number_one_texture, fs_in.texcoord);
 	}
 	else {
-		alpha = texture(go_texture, vec2(1.0f - fs_in.texcoord.x, fs_in.texcoord.y)).r;
+		alpha = texture(go_texture, vec2(fs_in.texcoord.x, fs_in.texcoord.y)).a;
 		if (alpha == 0.0f)
 			discard;
 		if (alpha != 0.0f)
