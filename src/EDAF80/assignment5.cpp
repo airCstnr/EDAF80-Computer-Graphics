@@ -103,11 +103,11 @@ void edaf80::Assignment5::setup_program_manager()
 	}
 
 	_program_manager.CreateAndRegisterProgram("Countdown shader ",
-		{ { ShaderType::vertex, "EDAF80/countdown.vert" },
-		{ ShaderType::fragment, "EDAF80/countdown.frag" } },
-		_countdown_shader);
+												{ { ShaderType::vertex, "EDAF80/countdown.vert" },
+												{ ShaderType::fragment, "EDAF80/countdown.frag" } },
+												_countdown_shader);
 	if (_countdown_shader == 0u) {
-		LogError("Failed to countdown_shader shader");
+		LogError("Failed to load countdown shader");
 		return;
 	}
 }
@@ -175,9 +175,9 @@ edaf80::Assignment5::run()
 		return;
 	}
 
-	// Load the quad shape for the countdown
-	auto const quad_shape = parametric_shapes::createQuadTess(10, 10, 10);
-	if (quad_shape.vao == 0u) {
+	// Load the quad shape for countdown
+	auto const countdown_shape = parametric_shapes::createQuadTess(10, 10, 2);
+	if (countdown_shape.vao == 0u) {
 		LogError("Failed to retrieve the shape mesh");
 		return;
 	}
@@ -297,12 +297,12 @@ edaf80::Assignment5::run()
 	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
 	nemo_node.set_hitbox_radius( 5 );
 
-	// Set up node for quad
-	auto quad_node = Node();
-	quad_node.set_geometry(quad_shape);
-	quad_node.set_program(&_countdown_shader, set_uniforms);
-	quad_node.get_transform().SetTranslate(glm::vec3(0, -13, -20));
-	quad_node.get_transform().RotateX(-glm::half_pi<float>());
+	// Set up node for countdown
+	auto countdown_node = Node();
+	countdown_node.set_geometry(countdown_shape);
+	countdown_node.set_program(&_countdown_shader, set_uniforms);
+	countdown_node.get_transform().SetTranslate(glm::vec3(-5, -15, -20));
+	countdown_node.get_transform().RotateX(-glm::half_pi<float>());
 
 	/* --------------------------------- Load textures ---------------------------------------*/
 
@@ -326,11 +326,11 @@ edaf80::Assignment5::run()
 
 	// Load number texture
 	GLuint const number_three_texture = bonobo::loadTexture2D("three.png");
-	quad_node.add_texture("number_trhee_texture", number_three_texture, GL_TEXTURE_2D);
+	countdown_node.add_texture("number_trhee_texture", number_three_texture, GL_TEXTURE_2D);
 	GLuint const number_two_texture = bonobo::loadTexture2D("two.png");
-	quad_node.add_texture("number_two_texture", number_two_texture, GL_TEXTURE_2D);
+	countdown_node.add_texture("number_two_texture", number_two_texture, GL_TEXTURE_2D);
 	GLuint const number_one_texture = bonobo::loadTexture2D("one.png");
-	quad_node.add_texture("number_one_texture", number_one_texture, GL_TEXTURE_2D);
+	countdown_node.add_texture("number_one_texture", number_one_texture, GL_TEXTURE_2D);
 
 
 	/* --------------------------------- Motion management ---------------------------------------*/
