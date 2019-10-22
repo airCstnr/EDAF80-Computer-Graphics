@@ -272,19 +272,16 @@ edaf80::Assignment5::run()
 	dory_node.set_hitbox_radius( 10 );
 
 	// Set up node for mine
-	int mines_number = 20;
-	int x_value = 1;
-	std::vector<Node> mine_node_vector = std::vector<Node>(mines_number);
-	for(size_t i = 1; i < mines_number; i++)
+	int mines_number = 50;
+	std::vector<Node> mine_node_vector = std::vector<Node>();
+	for(size_t i = 0; i < mines_number; i++)
 	{
 		auto mine_node = Node();
 		mine_node.set_geometry( mine );
 		mine_node.set_program( &_phong_shader, phong_set_uniforms );
 		mine_node.get_transform().SetScale( 0.1 );
-		mine_node.get_transform().SetTranslate( glm::vec3( 20*x_value + 5*cos(i), -15 + 3*sin(i), -(20*(float)i) ) );
 		mine_node.set_hitbox_radius( 10 );
 		mine_node_vector.push_back( mine_node );
-		x_value *= -1;
 	}
 
 	// Set up node for nemo
@@ -350,6 +347,17 @@ edaf80::Assignment5::run()
 	float dory_path_pos = 0.0f;
 	float dory_velocity = 0.1f;
 
+
+	/* --------------------------------- Set up path for mines ---------------------------------------*/
+	glm::vec3 point_i( -20, -15, 0 ), point_j; // position of mine, point i describing a path, j=i+1
+	for(size_t i = 0; i < mines_number/2; i+=2)
+	{
+		// create random position for mine using last position and cubic path
+		point_i = point_i + glm::vec3( -25.0f + 50.0f * (float( rand() ) / float( RAND_MAX )), 3*sin(i), -30);
+		mine_node_vector[i].get_transform().SetTranslate( point_i );
+		point_j = point_i + glm::vec3(60, 0, 0 );
+		mine_node_vector[i+1].get_transform().SetTranslate( point_j );
+	}
 
 	/* --------------------------------- GL Parameters ---------------------------------------*/
 
