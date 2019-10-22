@@ -306,17 +306,19 @@ edaf80::Assignment5::run()
 
 	/* --------------------------------- Load textures ---------------------------------------*/
 
-	// Cloudy hills cubemap set
-	auto sky_map = bonobo::loadTextureCubeMap("cloudyhills/posx.png", "cloudyhills/negx.png",
-		"cloudyhills/posy.png", "cloudyhills/negy.png",
-		"cloudyhills/posz.png", "cloudyhills/negz.png",
-		true);
+	// Load cloudy hills cubemap set
+	GLuint sky_map = bonobo::loadTextureCubeMap("cloudyhills/posx.png", "cloudyhills/negx.png",
+												"cloudyhills/posy.png", "cloudyhills/negy.png",
+												"cloudyhills/posz.png", "cloudyhills/negz.png",
+												true);
 
-	// Add cube map to current node
+	// Add cube map to sky node
 	sky_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
+
+	// Add cube map to water node for reflection/refraction
 	water_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
 
-	// For wave ripples
+	// Load wave ripples for water node
 	GLuint const wave_ripple_texture = bonobo::loadTexture2D("waves.png");
 	water_node.add_texture("wave_ripple_texture", wave_ripple_texture, GL_TEXTURE_2D);
 
@@ -324,7 +326,7 @@ edaf80::Assignment5::run()
 	GLuint const dory_texture = bonobo::loadTexture2D("dory_texture.jpg");
 	dory_node.add_texture("dory_texture", dory_texture, GL_TEXTURE_2D);
 
-	// Load number texture
+	// Load countdown textures
 	GLuint const number_three_texture = bonobo::loadTexture2D("three.png");
 	countdown_node.add_texture("number_trhee_texture", number_three_texture, GL_TEXTURE_2D);
 	GLuint const number_two_texture = bonobo::loadTexture2D("two.png");

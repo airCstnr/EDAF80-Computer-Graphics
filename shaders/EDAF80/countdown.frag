@@ -3,6 +3,7 @@
 uniform sampler2D number_three_texture;
 uniform sampler2D number_two_texture;
 uniform sampler2D number_one_texture;
+uniform sampler2D go_texture;
 
 uniform float time;
 
