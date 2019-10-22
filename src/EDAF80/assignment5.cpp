@@ -525,26 +525,18 @@ edaf80::Assignment5::run()
 		//
 		// custom ImGUI window
 		//
-		//bool opened = ImGui::Begin( "Scene Control", &opened, ImVec2( 300, 100 ), -1.0f, 0 );
-		//if(opened) {
-		//	bonobo::uiSelectPolygonMode( "Polygon mode", polygon_mode );
-		//}
-		//ImGui::End();
-
 		bool game_stats = ImGui::Begin( "Game Stats", &game_stats, ImVec2( 300, 100 ), -1.0f, 0 );
 		if(game_stats) {
-			/*
-			This text should be rendered on screen before the game starts and not in GUI
-			Not sure if GLUT is needed or there is some other way
-			ImGui::Text("Dory has finally learned the address to Marvin");
-			ImGui::Text("But now she is in a hurry");
-			ImGui::Text("Try to keep up and avoid any mines along the way");
-			ImGui::Text("The game will start in 3 seconds");
-			*/
 			if (_game_state == game_state::begin) {
+				/*
+				This text should be rendered on screen before the game starts and not in GUI
+				Not sure if GLUT is needed or there is some other way
+				*/
+				ImGui::Text("Dory has finally learned the address to Marvin");
+				ImGui::Text("But now she is in a hurry");
+				ImGui::Text("Try to keep up and avoid any mines along the way");
+				ImGui::Text("The game will start in 3 seconds");
 				ImGui::Text("Get ready!");
-				ImGui::Text("Distance : %.0f cm", dory_path_pos);
-				ImGui::Text("Time : %.0f s", time);
 			}
 			if (_game_state == game_state::play) {
 				if (nemo_node.distance(dory_node) < 75) {
@@ -561,11 +553,7 @@ edaf80::Assignment5::run()
 			}
 			if(_game_state == game_state::loose) {
 					ImGui::Text("Good try, you will make it next time!");
-				}
 			}
-
-			// TODO : print best score?
-			//ImGui::Text( "Best Score: " );
 		}
 		ImGui::End();
 
