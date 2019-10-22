@@ -39,7 +39,7 @@ void main()
 		if (alpha != 0.0f)
 			frag_color = texture(number_one_texture, fs_in.texcoord);
 	}
-	else {
+	else if (1.65 < time && time < 2.2) {
 		alpha = texture(go_texture, vec2(fs_in.texcoord.x, fs_in.texcoord.y)).a;
 		if (alpha == 0.0f)
 			discard;
