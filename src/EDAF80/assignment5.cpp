@@ -162,7 +162,7 @@ edaf80::Assignment5::run()
 	/* --------------------------------- Load  geometry ---------------------------------------*/
 
 	// Load the quad shape for water geometry
-	auto const water_shape = parametric_shapes::createQuadTess(200u, 200u, 100u);
+	auto const water_shape = parametric_shapes::createQuadTess(1000u, 1000u, 100u);
 	if (water_shape.vao == 0u) {
 		LogError("Failed to retrieve the shape mesh");
 		return;
@@ -252,7 +252,7 @@ edaf80::Assignment5::run()
 	water_node.set_geometry(water_shape);
 	water_node.set_program(&_water_shader, set_uniforms);
 	// Translate waves to set them at the center of the skybox
-	water_node.get_transform().SetTranslate(glm::vec3(-100, 0, -100));
+	water_node.get_transform().SetTranslate(glm::vec3(-500, 0, -500));
 
 	// Set up node for skybox
 	auto sky_node = Node();
