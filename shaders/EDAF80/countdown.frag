@@ -46,4 +46,7 @@ void main()
 		if (alpha != 0.0f)
 			frag_color = texture(go_texture, fs_in.texcoord);
 	}
+	else {
+		discard;
+	}
 }

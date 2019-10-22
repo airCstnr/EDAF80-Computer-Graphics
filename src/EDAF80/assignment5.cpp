@@ -264,7 +264,7 @@ edaf80::Assignment5::run()
 	dory_node.set_geometry(dory);
 	dory_node.set_program(&_dory_shader, set_uniforms);
 	// Translate dory to set her in front of me
-	dory_node.get_transform().SetTranslate( glm::vec3( 0, -15, -25 ) );
+	dory_node.get_transform().SetTranslate( glm::vec3( 0, -15, -30 ) );
 	// dory has to look in the same direction than me
 	dory_node.get_transform().RotateX( glm::half_pi<float>() );
 	dory_node.get_transform().RotateZ( glm::pi<float>() );
@@ -404,7 +404,7 @@ edaf80::Assignment5::run()
 		// Game logic if current state is begin ("loading" before game start to give player a chance to prepare")
 		if (_game_state == game_state::begin) {
 			// Update game state after 3 seconds
-			if (nowTime - startTime > 3000) {
+			if (nowTime - startTime > 4000) {
 				_game_state = game_state::play;
 			}
 		}
@@ -522,7 +522,7 @@ edaf80::Assignment5::run()
 			nemo_node.render( _camera.GetWorldToClipMatrix() );
 
 			if (_game_state == game_state::begin) {
-				quad_node.render(_camera.GetWorldToClipMatrix());
+				countdown_node.render(_camera.GetWorldToClipMatrix());
 			}
 		}
 
