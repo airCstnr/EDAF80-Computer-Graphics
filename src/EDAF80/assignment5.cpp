@@ -426,42 +426,36 @@ edaf80::Assignment5::run()
 			// Update game state to game_over if Dory gets to far away
 			if (nemo_node.distance(dory_node) > 100) {
 				std::cerr << "You failed, Dorry got to far away" << std::endl;
-				_game_state = game_state::game_over;
+				_game_state = game_state::loose;
 			}
 
 			// Update game state according to hitboxes (Dory)
 			if (nemo_node.hits(dory_node)) {
 				std::cerr << "You failed hitting Dory!" << std::endl;
-				_game_state = game_state::game_over;
+				_game_state = game_state::loose;
 			}
 
 			// Update game state according to hitboxes (mine)
 			for (Node mine_node : mine_node_vector) {
 				if (nemo_node.hits(mine_node)) {
 					std::cerr << "You failed hitting a mine!" << std::endl;
-					_game_state = game_state::game_over;
+					_game_state = game_state::loose;
 				}
 			}
 			// Update the game after
 			if (nowTime - startTime > 60000) {
 				std::cerr << "You win! You followed Dory all the way!" << std::endl;
-				_game_state = game_state::game_over;
+				_game_state = game_state::win;
 			}
 		}
+
 		// Update variables according to game state
 		switch(_game_state)
 		{
-			case edaf80::Assignment5::begin:
-				enable_dory_motion = false;
-				break;
 			case edaf80::Assignment5::play:
 				enable_dory_motion = true;
-				break;
-			case edaf80::Assignment5::game_over:
-				enable_dory_motion = false;
-				break;
 			default:
-				// do nothing
+				enable_dory_motion = false;
 				break;
 		}
 
@@ -470,7 +464,11 @@ edaf80::Assignment5::run()
 
 		glfwPollEvents();
 		_inputHandler.Advance();
-		_camera.Update(ddeltatime, _inputHandler);
+
+		if(_game_state == game_state::play)
+		{
+			_camera.Update(ddeltatime, _inputHandler);
+		}
 
 		if (_inputHandler.GetKeycodeState(GLFW_KEY_F3) & JUST_RELEASED)
 			show_logs = !show_logs;
@@ -490,7 +488,7 @@ edaf80::Assignment5::run()
 		}
 		if(_inputHandler.GetKeycodeState( GLFW_KEY_SPACE ) & JUST_PRESSED) {
 			// Enable/Disable Dory Motion
-			enable_dory_motion = !enable_dory_motion;
+			//enable_dory_motion = !enable_dory_motion;
 		}
 
 		ImGui_ImplGlfwGL3_NewFrame();
@@ -542,26 +540,18 @@ edaf80::Assignment5::run()
 		//
 		// custom ImGUI window
 		//
-		//bool opened = ImGui::Begin( "Scene Control", &opened, ImVec2( 300, 100 ), -1.0f, 0 );
-		//if(opened) {
-		//	bonobo::uiSelectPolygonMode( "Polygon mode", polygon_mode );
-		//}
-		//ImGui::End();
-
 		bool game_stats = ImGui::Begin( "Game Stats", &game_stats, ImVec2( 300, 100 ), -1.0f, 0 );
 		if(game_stats) {
-			/*
-			This text should be rendered on screen before the game starts and not in GUI
-			Not sure if GLUT is needed or there is some other way
-			ImGui::Text("Dory has finally learned the address to Marvin");
-			ImGui::Text("But now she is in a hurry");
-			ImGui::Text("Try to keep up and avoid any mines along the way");
-			ImGui::Text("The game will start in 3 seconds");
-			*/
 			if (_game_state == game_state::begin) {
+				/*
+				This text should be rendered on screen before the game starts and not in GUI
+				Not sure if GLUT is needed or there is some other way
+				*/
+				ImGui::Text("Dory has finally learned the address to Marvin");
+				ImGui::Text("But now she is in a hurry");
+				ImGui::Text("Try to keep up and avoid any mines along the way");
+				ImGui::Text("The game will start in 3 seconds");
 				ImGui::Text("Get ready!");
-				ImGui::Text("Distance : %.0f cm", dory_path_pos);
-				ImGui::Text("Time : %.0f s", time);
 			}
 			if (_game_state == game_state::play) {
 				if (nemo_node.distance(dory_node) < 75) {
@@ -573,17 +563,12 @@ edaf80::Assignment5::run()
 				ImGui::Text("Distance : %.0f cm", dory_path_pos);
 				ImGui::Text("Time : %.0f s", time);
 			}
-			if (_game_state == game_state::game_over) {
-				if (nowTime - startTime > 60000) {
-					ImGui::Text("You win!You followed Dory all the way!");
-				}
-				else {
-					ImGui::Text("Good try, you will make it next time!");
-				}
+			if (_game_state == game_state::win) {
+					ImGui::Text("You win! You followed Dory all the way!");
 			}
-
-			// TODO : print best score?
-			//ImGui::Text( "Best Score: " );
+			if(_game_state == game_state::loose) {
+					ImGui::Text("Good try, you will make it next time!");
+			}
 		}
 		ImGui::End();
 

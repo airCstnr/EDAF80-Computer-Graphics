@@ -35,7 +35,8 @@ namespace edaf80
 		enum game_state {
 			begin,		//! State for beginning of the game
 			play,		//! State for playing the game
-			game_over,	//! State for end of the game
+			win,		//! State for end of the game (winner)
+			loose,		//! State for end of the game (looser)
 		};
 
 		//! \brief Contains the logic of the assignment, along with the
