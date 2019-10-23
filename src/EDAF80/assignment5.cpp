@@ -456,6 +456,7 @@ edaf80::Assignment5::run()
 		{
 			case edaf80::Assignment5::play:
 				enable_dory_motion = true;
+				break;
 			default:
 				enable_dory_motion = false;
 				break;
