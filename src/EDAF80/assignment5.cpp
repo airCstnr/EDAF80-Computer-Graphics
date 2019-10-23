@@ -502,20 +502,16 @@ edaf80::Assignment5::run()
 			polygon_mode = static_cast<bonobo::polygon_mode_t>((static_cast<int>(polygon_mode) + 1) % 3);
 		}
 		if(_inputHandler.GetKeycodeState( GLFW_KEY_SPACE ) & JUST_PRESSED) {
-			if (_game_state != game_state::begin) {
-				if (enable_dory_motion == true) {
-					_game_state = game_state::pause;
-					enable_dory_motion = false;
-				}
-				else {
-					_game_state = game_state::play;
-					enable_dory_motion = true;
-				}
+			if (_game_state == game_state::play) {  
+				// if playing switch to paus
+				_game_state = game_state::pause;
+				enable_dory_motion = false;
 			}
-
-
-			// Enable/Disable Dory Motion
-			//enable_dory_motion = !enable_dory_motion;
+			else if (_game_state == game_state::pause) {  
+				// if paused switch to play
+				_game_state = game_state::play;
+				enable_dory_motion = true;
+			}
 		}
 
 		ImGui_ImplGlfwGL3_NewFrame();
