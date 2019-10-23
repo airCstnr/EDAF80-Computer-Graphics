@@ -103,11 +103,11 @@ void edaf80::Assignment5::setup_program_manager()
 	}
 
 	_program_manager.CreateAndRegisterProgram("Countdown shader ",
-		{ { ShaderType::vertex, "EDAF80/countdown.vert" },
-		{ ShaderType::fragment, "EDAF80/countdown.frag" } },
-		_countdown_shader);
+												{ { ShaderType::vertex, "EDAF80/countdown.vert" },
+												{ ShaderType::fragment, "EDAF80/countdown.frag" } },
+												_countdown_shader);
 	if (_countdown_shader == 0u) {
-		LogError("Failed to countdown_shader shader");
+		LogError("Failed to load countdown shader");
 		return;
 	}
 }
@@ -178,9 +178,9 @@ edaf80::Assignment5::run()
 		return;
 	}
 
-	// Load the quad shape for the countdown
-	auto const quad_shape = parametric_shapes::createQuadTess(10, 10, 10);
-	if (quad_shape.vao == 0u) {
+	// Load the quad shape for countdown
+	auto const countdown_shape = parametric_shapes::createQuadTess(10, 10, 2);
+	if (countdown_shape.vao == 0u) {
 		LogError("Failed to retrieve the shape mesh");
 		return;
 	}
@@ -267,7 +267,7 @@ edaf80::Assignment5::run()
 	dory_node.set_geometry(dory);
 	dory_node.set_program(&_dory_shader, set_uniforms);
 	// Translate dory to set her in front of me
-	dory_node.get_transform().SetTranslate( glm::vec3( 0, -15, -25 ) );
+	dory_node.get_transform().SetTranslate( glm::vec3( 0, -15, -30 ) );
 	// dory has to look in the same direction than me
 	dory_node.get_transform().RotateX( glm::half_pi<float>() );
 	dory_node.get_transform().RotateZ( glm::pi<float>() );
@@ -297,26 +297,28 @@ edaf80::Assignment5::run()
 	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
 	nemo_node.set_hitbox_radius( 5 );
 
-	// Set up node for quad
-	auto quad_node = Node();
-	quad_node.set_geometry(quad_shape);
-	quad_node.set_program(&_countdown_shader, set_uniforms);
-	quad_node.get_transform().SetTranslate(glm::vec3(0, -13, -20));
-	quad_node.get_transform().RotateX(-glm::half_pi<float>());
+	// Set up node for countdown
+	auto countdown_node = Node();
+	countdown_node.set_geometry(countdown_shape);
+	countdown_node.set_program(&_countdown_shader, set_uniforms);
+	countdown_node.get_transform().SetTranslate(glm::vec3(-5, -15, -20));
+	countdown_node.get_transform().RotateX(-glm::half_pi<float>());
 
 	/* --------------------------------- Load textures ---------------------------------------*/
 
-	// Cloudy hills cubemap set
-	auto sky_map = bonobo::loadTextureCubeMap("cloudyhills/posx.png", "cloudyhills/negx.png",
-		"cloudyhills/posy.png", "cloudyhills/negy.png",
-		"cloudyhills/posz.png", "cloudyhills/negz.png",
-		true);
+	// Load cloudy hills cubemap set
+	GLuint sky_map = bonobo::loadTextureCubeMap("cloudyhills/posx.png", "cloudyhills/negx.png",
+												"cloudyhills/posy.png", "cloudyhills/negy.png",
+												"cloudyhills/posz.png", "cloudyhills/negz.png",
+												true);
 
-	// Add cube map to current node
+	// Add cube map to sky node
 	sky_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
+
+	// Add cube map to water node for reflection/refraction
 	water_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
 
-	// For wave ripples
+	// Load wave ripples for water node
 	GLuint const wave_ripple_texture = bonobo::loadTexture2D("waves.png");
 	water_node.add_texture("wave_ripple_texture", wave_ripple_texture, GL_TEXTURE_2D);
 
@@ -324,13 +326,15 @@ edaf80::Assignment5::run()
 	GLuint const dory_texture = bonobo::loadTexture2D("dory_texture.jpg");
 	dory_node.add_texture("dory_texture", dory_texture, GL_TEXTURE_2D);
 
-	// Load number texture
+	// Load countdown textures
 	GLuint const number_three_texture = bonobo::loadTexture2D("three.png");
-	quad_node.add_texture("number_trhee_texture", number_three_texture, GL_TEXTURE_2D);
+	countdown_node.add_texture("number_trhee_texture", number_three_texture, GL_TEXTURE_2D);
 	GLuint const number_two_texture = bonobo::loadTexture2D("two.png");
-	quad_node.add_texture("number_two_texture", number_two_texture, GL_TEXTURE_2D);
+	countdown_node.add_texture("number_two_texture", number_two_texture, GL_TEXTURE_2D);
 	GLuint const number_one_texture = bonobo::loadTexture2D("one.png");
-	quad_node.add_texture("number_one_texture", number_one_texture, GL_TEXTURE_2D);
+	countdown_node.add_texture("number_one_texture", number_one_texture, GL_TEXTURE_2D);
+	GLuint const go_texture = bonobo::loadTexture2D( "go.png" );
+	countdown_node.add_texture( "go_texture", go_texture, GL_TEXTURE_2D );
 
 
 	/* --------------------------------- Motion management ---------------------------------------*/
@@ -411,7 +415,7 @@ edaf80::Assignment5::run()
 		// Game logic if current state is begin ("loading" before game start to give player a chance to prepare")
 		if (_game_state == game_state::begin) {
 			// Update game state after 3 seconds
-			if (nowTime - startTime > 3000) {
+			if (nowTime - startTime > 4000) {
 				_game_state = game_state::play;
 			}
 		}
@@ -529,7 +533,7 @@ edaf80::Assignment5::run()
 			nemo_node.render( _camera.GetWorldToClipMatrix() );
 
 			if (_game_state == game_state::begin) {
-				quad_node.render(_camera.GetWorldToClipMatrix());
+				countdown_node.render(_camera.GetWorldToClipMatrix());
 			}
 		}
 
