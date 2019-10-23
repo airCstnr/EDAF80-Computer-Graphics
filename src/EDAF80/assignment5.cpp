@@ -271,6 +271,7 @@ edaf80::Assignment5::run()
 	// dory has to look in the same direction than me
 	dory_node.get_transform().RotateX( glm::half_pi<float>() );
 	dory_node.get_transform().RotateZ( glm::pi<float>() );
+	glm::vec3 dory_start_position = dory_node.get_transform().GetTranslation();
 	// Add hitbox value for Dory
 	dory_node.set_hitbox_radius( 10 );
 
@@ -294,6 +295,7 @@ edaf80::Assignment5::run()
 	auto nemo_camera_translation = glm::vec3( -1, -7, -10 );
 	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
 	nemo_node.set_hitbox_radius( 5 );
+	glm::vec3 nemo_start_position = nemo_node.get_transform().GetTranslation();
 
 	// Set up node for countdown
 	auto countdown_node = Node();
@@ -405,6 +407,9 @@ edaf80::Assignment5::run()
 		// handle time between two frames
 		nowTime = GetTimeMilliseconds();
 		ddeltatime = nowTime - lastTime;
+		if (_game_state == game_state::begin || _game_state == game_state::play) {
+			playedTime += ddeltatime;
+		}
 
 		if (nowTime > fpsNextTick) {
 			fpsNextTick += 1000.0;
@@ -420,7 +425,7 @@ edaf80::Assignment5::run()
 		// Game logic if current state is begin ("loading" before game start to give player a chance to prepare")
 		if (_game_state == game_state::begin) {
 			// Update game state after 4 seconds
-			if (nowTime - startTime > 4000) {
+			if (playedTime > 4000) {
 				_game_state = game_state::play;
 			}
 		}
@@ -448,7 +453,7 @@ edaf80::Assignment5::run()
 				}
 			}
 			// Update the game state to win if player have followed Dory for one minute
-			if (time > 60) { // time is roughly seconds
+			if (playedTime > 60000 + 4000 ) { 
 				std::cerr << "You win! You followed Dory all the way!" << std::endl;
 				_game_state = game_state::win;
 			}
@@ -513,6 +518,19 @@ edaf80::Assignment5::run()
 				enable_dory_motion = true;
 			}
 		}
+
+		// Restart the game
+		if (_game_state != game_state::play) {
+			if (_inputHandler.GetKeycodeState(GLFW_KEY_ENTER) & JUST_PRESSED) {
+				dory_node.get_transform().SetTranslate(dory_start_position);
+				_camera.mWorld.SetTranslate(glm::vec3(0.0f, -10.0f, 0.0f)); 
+				playedTime = 0;
+				time = 0;
+				_game_state = game_state::begin;
+			}
+		}
+
+		
 
 		ImGui_ImplGlfwGL3_NewFrame();
 
@@ -584,22 +602,26 @@ edaf80::Assignment5::run()
 					ImGui::Text("Dory is getting away, hurry up!");
 				}
 				ImGui::Text("Distance : %.0f cm", nemo_node.distance(dory_node));
-				ImGui::Text("Time : %.0f s", time);
+				ImGui::Text("Time : %.0f s", (playedTime/1000) - 4);
 			}
 			if (_game_state == game_state::win) {
 					ImGui::Text("You win! You followed Dory all the way!");
+					ImGui::Text("Press Enter to restart game");
 			}
 			if(_game_state == game_state::loose_Dory) {
 					ImGui::Text("You failed hitting Dory!");
+					ImGui::Text("Press Enter to restart game");
 			}
 			if (_game_state == game_state::loose_mine) {
 				ImGui::Text("You failed hitting a mine!");
+				ImGui::Text("Press Enter to restart game");
 			}
 			if (_game_state == game_state::loose_distance) {
 				ImGui::Text("You failed, Dory got to far away");
+				ImGui::Text("Press Enter to restart game");
 			}
 			if (_game_state == game_state::pause) {
-				ImGui::Text("Game paused, press space to continue");
+				ImGui::Text("Game paused, press space to continue or press enter to restart");
 			}
 		}
 		ImGui::End();
