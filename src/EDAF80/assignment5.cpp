@@ -382,6 +382,7 @@ edaf80::Assignment5::run()
 	f64 ddeltatime;
 	size_t fpsSamples = 0;
 	double nowTime;
+	double playedTime = 0;
 	double lastTime = GetTimeMilliseconds();
 	double startTime = GetTimeMilliseconds();
 	double fpsNextTick = lastTime + 1000.0;
@@ -405,6 +406,7 @@ edaf80::Assignment5::run()
 		// handle time between two frames
 		nowTime = GetTimeMilliseconds();
 		ddeltatime = nowTime - lastTime;
+
 		if (nowTime > fpsNextTick) {
 			fpsNextTick += 1000.0;
 			fpsSamples = 0;
@@ -412,11 +414,13 @@ edaf80::Assignment5::run()
 		fpsSamples++;
 
 		// Increment time for waves movement
+		if(_game_state != game_state::pause || _game_state != game_state::begin) {  // don't increment time if game is paused or not started
 		time += 0.01;
+		}
 
 		// Game logic if current state is begin ("loading" before game start to give player a chance to prepare")
 		if (_game_state == game_state::begin) {
-			// Update game state after 3 seconds
+			// Update game state after 4 seconds
 			if (nowTime - startTime > 4000) {
 				_game_state = game_state::play;
 			}
@@ -428,29 +432,30 @@ edaf80::Assignment5::run()
 			// Update game state to game_over if Dory gets to far away
 			if (nemo_node.distance(dory_node) > 100) {
 				std::cerr << "You failed, Dorry got to far away" << std::endl;
-				_game_state = game_state::loose;
+				_game_state = game_state::loose_distance;
 			}
 
 			// Update game state according to hitboxes (Dory)
 			if (nemo_node.hits(dory_node)) {
 				std::cerr << "You failed hitting Dory!" << std::endl;
-				_game_state = game_state::loose;
+				_game_state = game_state::loose_Dory;
 			}
 
 			// Update game state according to hitboxes (mine)
 			for (Node mine_node : mine_node_vector) {
 				if (nemo_node.hits(mine_node)) {
 					std::cerr << "You failed hitting a mine!" << std::endl;
-					_game_state = game_state::loose;
+					_game_state = game_state::loose_mine;
 				}
 			}
-			// Update the game after
-			if (nowTime - startTime > 60000) {
+			// Update the game state to win if player have followed Dory for one minute
+			if (time > 60) { // time is roughly seconds
 				std::cerr << "You win! You followed Dory all the way!" << std::endl;
 				_game_state = game_state::win;
 			}
 		}
 
+		/*
 		// Update variables according to game state
 		switch(_game_state)
 		{
@@ -459,6 +464,14 @@ edaf80::Assignment5::run()
 			default:
 				enable_dory_motion = false;
 				break;
+		}
+		*/
+
+		if (_game_state == game_state::play) {
+			enable_dory_motion = true;
+		}
+		else {
+			enable_dory_motion = false;
 		}
 
 		auto& io = ImGui::GetIO();
@@ -489,6 +502,18 @@ edaf80::Assignment5::run()
 			polygon_mode = static_cast<bonobo::polygon_mode_t>((static_cast<int>(polygon_mode) + 1) % 3);
 		}
 		if(_inputHandler.GetKeycodeState( GLFW_KEY_SPACE ) & JUST_PRESSED) {
+			if (_game_state != game_state::begin) {
+				if (enable_dory_motion == true) {
+					_game_state = game_state::pause;
+					enable_dory_motion = false;
+				}
+				else {
+					_game_state = game_state::play;
+					enable_dory_motion = true;
+				}
+			}
+
+
 			// Enable/Disable Dory Motion
 			//enable_dory_motion = !enable_dory_motion;
 		}
@@ -507,6 +532,8 @@ edaf80::Assignment5::run()
 			// increase dory postion using her velocity
 			dory_path_pos += dory_velocity;
 		}
+
+		// Move mines
 		
 		// Move Nemo
 		nemo_node.get_transform().SetTranslate( _camera.mWorld.GetTranslation() + nemo_camera_translation );
@@ -568,8 +595,17 @@ edaf80::Assignment5::run()
 			if (_game_state == game_state::win) {
 					ImGui::Text("You win! You followed Dory all the way!");
 			}
-			if(_game_state == game_state::loose) {
-					ImGui::Text("Good try, you will make it next time!");
+			if(_game_state == game_state::loose_Dory) {
+					ImGui::Text("You failed hitting Dory!");
+			}
+			if (_game_state == game_state::loose_mine) {
+				ImGui::Text("You failed hitting a mine!");
+			}
+			if (_game_state == game_state::loose_distance) {
+				ImGui::Text("You failed, Dorry got to far away");
+			}
+			if (_game_state == game_state::pause) {
+				ImGui::Text("Game paused, press space to continue");
 			}
 		}
 		ImGui::End();

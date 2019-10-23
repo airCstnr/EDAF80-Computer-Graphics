@@ -33,10 +33,13 @@ namespace edaf80
 							std::vector<glm::vec3>& path );
 
 		enum game_state {
-			begin,		//! State for beginning of the game
-			play,		//! State for playing the game
-			win,		//! State for end of the game (winner)
-			loose,		//! State for end of the game (looser)
+			begin,			//! State for beginning of the game
+			play,			//! State for playing the game
+			win,			//! State for end of the game (winner)
+			loose_Dory,		//! State for end of the game if hit Dory	(looser)
+			loose_mine,		//! State for end of the game if hit mine	(looser)
+			loose_distance, //! State for end of the game if Dory got to far away	(looser)
+			pause,			//! State for pausing the game
 		};
 
 		//! \brief Contains the logic of the assignment, along with the
