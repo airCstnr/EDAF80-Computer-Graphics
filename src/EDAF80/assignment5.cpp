@@ -103,11 +103,11 @@ void edaf80::Assignment5::setup_program_manager()
 	}
 
 	_program_manager.CreateAndRegisterProgram("Countdown shader ",
-		{ { ShaderType::vertex, "EDAF80/countdown.vert" },
-		{ ShaderType::fragment, "EDAF80/countdown.frag" } },
-		_countdown_shader);
+												{ { ShaderType::vertex, "EDAF80/countdown.vert" },
+												{ ShaderType::fragment, "EDAF80/countdown.frag" } },
+												_countdown_shader);
 	if (_countdown_shader == 0u) {
-		LogError("Failed to countdown_shader shader");
+		LogError("Failed to load countdown shader");
 		return;
 	}
 }
@@ -153,6 +153,9 @@ glm::vec3 Assignment5::get_step( float path_pos,
 void
 edaf80::Assignment5::run()
 {
+	// Add absolute seed to randomization
+	srand( time(0) );
+
 	/* --------------------------------- Setup camera & motion ---------------------------------------*/
 	setup_camera();
 
@@ -162,7 +165,7 @@ edaf80::Assignment5::run()
 	/* --------------------------------- Load  geometry ---------------------------------------*/
 
 	// Load the quad shape for water geometry
-	auto const water_shape = parametric_shapes::createQuadTess(200u, 200u, 100u);
+	auto const water_shape = parametric_shapes::createQuadTess(1000u, 1000u, 100u);
 	if (water_shape.vao == 0u) {
 		LogError("Failed to retrieve the shape mesh");
 		return;
@@ -175,9 +178,9 @@ edaf80::Assignment5::run()
 		return;
 	}
 
-	// Load the quad shape for the countdown
-	auto const quad_shape = parametric_shapes::createQuadTess(10, 10, 10);
-	if (quad_shape.vao == 0u) {
+	// Load the quad shape for countdown
+	auto const countdown_shape = parametric_shapes::createQuadTess(10, 10, 2);
+	if (countdown_shape.vao == 0u) {
 		LogError("Failed to retrieve the shape mesh");
 		return;
 	}
@@ -252,7 +255,7 @@ edaf80::Assignment5::run()
 	water_node.set_geometry(water_shape);
 	water_node.set_program(&_water_shader, set_uniforms);
 	// Translate waves to set them at the center of the skybox
-	water_node.get_transform().SetTranslate(glm::vec3(-100, 0, -100));
+	water_node.get_transform().SetTranslate(glm::vec3(-500, 0, -500));
 
 	// Set up node for skybox
 	auto sky_node = Node();
@@ -264,7 +267,7 @@ edaf80::Assignment5::run()
 	dory_node.set_geometry(dory);
 	dory_node.set_program(&_dory_shader, set_uniforms);
 	// Translate dory to set her in front of me
-	dory_node.get_transform().SetTranslate( glm::vec3( 0, -15, -25 ) );
+	dory_node.get_transform().SetTranslate( glm::vec3( 0, -15, -30 ) );
 	// dory has to look in the same direction than me
 	dory_node.get_transform().RotateX( glm::half_pi<float>() );
 	dory_node.get_transform().RotateZ( glm::pi<float>() );
@@ -272,19 +275,16 @@ edaf80::Assignment5::run()
 	dory_node.set_hitbox_radius( 10 );
 
 	// Set up node for mine
-	int mines_number = 20;
-	int x_value = 1;
-	std::vector<Node> mine_node_vector = std::vector<Node>(mines_number);
-	for(size_t i = 1; i < mines_number; i++)
+	int mines_number = 50;
+	std::vector<Node> mine_node_vector = std::vector<Node>();
+	for(size_t i = 0; i < mines_number; i++)
 	{
 		auto mine_node = Node();
 		mine_node.set_geometry( mine );
 		mine_node.set_program( &_phong_shader, phong_set_uniforms );
 		mine_node.get_transform().SetScale( 0.1 );
-		mine_node.get_transform().SetTranslate( glm::vec3( 20*x_value + 5*cos(i), -15 + 3*sin(i), -(20*(float)i) ) );
 		mine_node.set_hitbox_radius( 10 );
 		mine_node_vector.push_back( mine_node );
-		x_value *= -1;
 	}
 
 	// Set up node for nemo
@@ -295,26 +295,28 @@ edaf80::Assignment5::run()
 	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
 	nemo_node.set_hitbox_radius( 5 );
 
-	// Set up node for quad
-	auto quad_node = Node();
-	quad_node.set_geometry(quad_shape);
-	quad_node.set_program(&_countdown_shader, set_uniforms);
-	quad_node.get_transform().SetTranslate(glm::vec3(0, -13, -20));
-	quad_node.get_transform().RotateX(-glm::half_pi<float>());
+	// Set up node for countdown
+	auto countdown_node = Node();
+	countdown_node.set_geometry(countdown_shape);
+	countdown_node.set_program(&_countdown_shader, set_uniforms);
+	countdown_node.get_transform().SetTranslate(glm::vec3(-5, -15, -20));
+	countdown_node.get_transform().RotateX(-glm::half_pi<float>());
 
 	/* --------------------------------- Load textures ---------------------------------------*/
 
-	// Cloudy hills cubemap set
-	auto sky_map = bonobo::loadTextureCubeMap("cloudyhills/posx.png", "cloudyhills/negx.png",
-		"cloudyhills/posy.png", "cloudyhills/negy.png",
-		"cloudyhills/posz.png", "cloudyhills/negz.png",
-		true);
+	// Load cloudy hills cubemap set
+	GLuint sky_map = bonobo::loadTextureCubeMap("cloudyhills/posx.png", "cloudyhills/negx.png",
+												"cloudyhills/posy.png", "cloudyhills/negy.png",
+												"cloudyhills/posz.png", "cloudyhills/negz.png",
+												true);
 
-	// Add cube map to current node
+	// Add cube map to sky node
 	sky_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
+
+	// Add cube map to water node for reflection/refraction
 	water_node.add_texture("cube_map", sky_map, GL_TEXTURE_CUBE_MAP);
 
-	// For wave ripples
+	// Load wave ripples for water node
 	GLuint const wave_ripple_texture = bonobo::loadTexture2D("waves.png");
 	water_node.add_texture("wave_ripple_texture", wave_ripple_texture, GL_TEXTURE_2D);
 
@@ -326,13 +328,15 @@ edaf80::Assignment5::run()
 	GLuint const nemo_texture = bonobo::loadTexture2D( "lambert1_Base_Color.png" );
 	nemo_node.add_texture( "dory_texture", nemo_texture, GL_TEXTURE_2D );
 
-	// Load number texture
+	// Load countdown textures
 	GLuint const number_three_texture = bonobo::loadTexture2D("three.png");
-	quad_node.add_texture("number_trhee_texture", number_three_texture, GL_TEXTURE_2D);
+	countdown_node.add_texture("number_trhee_texture", number_three_texture, GL_TEXTURE_2D);
 	GLuint const number_two_texture = bonobo::loadTexture2D("two.png");
-	quad_node.add_texture("number_two_texture", number_two_texture, GL_TEXTURE_2D);
+	countdown_node.add_texture("number_two_texture", number_two_texture, GL_TEXTURE_2D);
 	GLuint const number_one_texture = bonobo::loadTexture2D("one.png");
-	quad_node.add_texture("number_one_texture", number_one_texture, GL_TEXTURE_2D);
+	countdown_node.add_texture("number_one_texture", number_one_texture, GL_TEXTURE_2D);
+	GLuint const go_texture = bonobo::loadTexture2D( "go.png" );
+	countdown_node.add_texture( "go_texture", go_texture, GL_TEXTURE_2D );
 
 
 	/* --------------------------------- Motion management ---------------------------------------*/
@@ -352,6 +356,17 @@ edaf80::Assignment5::run()
 	float dory_path_pos = 0.0f;
 	float dory_velocity = 0.1f;
 
+
+	/* --------------------------------- Set up path for mines ---------------------------------------*/
+	glm::vec3 point_i( -20, -15, 0 ), point_j; // position of mine, point i describing a path, j=i+1
+	for(size_t i = 0; i < mines_number/2; i+=2)
+	{
+		// create random position for mine using last position and cubic path
+		point_i = point_i + glm::vec3( -25.0f + 50.0f * (float( rand() ) / float( RAND_MAX )), 3*sin(i), -30);
+		mine_node_vector[i].get_transform().SetTranslate( point_i );
+		point_j = point_i + glm::vec3(60, 0, 0 );
+		mine_node_vector[i+1].get_transform().SetTranslate( point_j );
+	}
 
 	/* --------------------------------- GL Parameters ---------------------------------------*/
 
@@ -402,7 +417,7 @@ edaf80::Assignment5::run()
 		// Game logic if current state is begin ("loading" before game start to give player a chance to prepare")
 		if (_game_state == game_state::begin) {
 			// Update game state after 3 seconds
-			if (nowTime - startTime > 3000) {
+			if (nowTime - startTime > 4000) {
 				_game_state = game_state::play;
 			}
 		}
@@ -413,42 +428,36 @@ edaf80::Assignment5::run()
 			// Update game state to game_over if Dory gets to far away
 			if (nemo_node.distance(dory_node) > 100) {
 				std::cerr << "You failed, Dorry got to far away" << std::endl;
-				_game_state = game_state::game_over;
+				_game_state = game_state::loose;
 			}
 
 			// Update game state according to hitboxes (Dory)
 			if (nemo_node.hits(dory_node)) {
 				std::cerr << "You failed hitting Dory!" << std::endl;
-				_game_state = game_state::game_over;
+				_game_state = game_state::loose;
 			}
 
 			// Update game state according to hitboxes (mine)
 			for (Node mine_node : mine_node_vector) {
 				if (nemo_node.hits(mine_node)) {
 					std::cerr << "You failed hitting a mine!" << std::endl;
-					_game_state = game_state::game_over;
+					_game_state = game_state::loose;
 				}
 			}
 			// Update the game after
 			if (nowTime - startTime > 60000) {
 				std::cerr << "You win! You followed Dory all the way!" << std::endl;
-				_game_state = game_state::game_over;
+				_game_state = game_state::win;
 			}
 		}
+
 		// Update variables according to game state
 		switch(_game_state)
 		{
-			case edaf80::Assignment5::begin:
-				enable_dory_motion = false;
-				break;
 			case edaf80::Assignment5::play:
 				enable_dory_motion = true;
-				break;
-			case edaf80::Assignment5::game_over:
-				enable_dory_motion = false;
-				break;
 			default:
-				// do nothing
+				enable_dory_motion = false;
 				break;
 		}
 
@@ -457,7 +466,11 @@ edaf80::Assignment5::run()
 
 		glfwPollEvents();
 		_inputHandler.Advance();
-		_camera.Update(ddeltatime, _inputHandler);
+
+		if(_game_state == game_state::play)
+		{
+			_camera.Update(ddeltatime, _inputHandler);
+		}
 
 		if (_inputHandler.GetKeycodeState(GLFW_KEY_F3) & JUST_RELEASED)
 			show_logs = !show_logs;
@@ -477,7 +490,7 @@ edaf80::Assignment5::run()
 		}
 		if(_inputHandler.GetKeycodeState( GLFW_KEY_SPACE ) & JUST_PRESSED) {
 			// Enable/Disable Dory Motion
-			enable_dory_motion = !enable_dory_motion;
+			//enable_dory_motion = !enable_dory_motion;
 		}
 
 		ImGui_ImplGlfwGL3_NewFrame();
@@ -520,7 +533,7 @@ edaf80::Assignment5::run()
 			nemo_node.render( _camera.GetWorldToClipMatrix() );
 
 			if (_game_state == game_state::begin) {
-				quad_node.render(_camera.GetWorldToClipMatrix());
+				countdown_node.render(_camera.GetWorldToClipMatrix());
 			}
 		}
 
@@ -529,26 +542,18 @@ edaf80::Assignment5::run()
 		//
 		// custom ImGUI window
 		//
-		//bool opened = ImGui::Begin( "Scene Control", &opened, ImVec2( 300, 100 ), -1.0f, 0 );
-		//if(opened) {
-		//	bonobo::uiSelectPolygonMode( "Polygon mode", polygon_mode );
-		//}
-		//ImGui::End();
-
 		bool game_stats = ImGui::Begin( "Game Stats", &game_stats, ImVec2( 300, 100 ), -1.0f, 0 );
 		if(game_stats) {
-			/*
-			This text should be rendered on screen before the game starts and not in GUI
-			Not sure if GLUT is needed or there is some other way
-			ImGui::Text("Dory has finally learned the address to Marvin");
-			ImGui::Text("But now she is in a hurry");
-			ImGui::Text("Try to keep up and avoid any mines along the way");
-			ImGui::Text("The game will start in 3 seconds");
-			*/
 			if (_game_state == game_state::begin) {
+				/*
+				This text should be rendered on screen before the game starts and not in GUI
+				Not sure if GLUT is needed or there is some other way
+				*/
+				ImGui::Text("Dory has finally learned the address to Marvin");
+				ImGui::Text("But now she is in a hurry");
+				ImGui::Text("Try to keep up and avoid any mines along the way");
+				ImGui::Text("The game will start in 3 seconds");
 				ImGui::Text("Get ready!");
-				ImGui::Text("Distance : %.0f cm", dory_path_pos);
-				ImGui::Text("Time : %.0f s", time);
 			}
 			if (_game_state == game_state::play) {
 				if (nemo_node.distance(dory_node) < 75) {
@@ -560,17 +565,12 @@ edaf80::Assignment5::run()
 				ImGui::Text("Distance : %.0f cm", dory_path_pos);
 				ImGui::Text("Time : %.0f s", time);
 			}
-			if (_game_state == game_state::game_over) {
-				if (nowTime - startTime > 60000) {
-					ImGui::Text("You win!You followed Dory all the way!");
-				}
-				else {
-					ImGui::Text("Good try, you will make it next time!");
-				}
+			if (_game_state == game_state::win) {
+					ImGui::Text("You win! You followed Dory all the way!");
 			}
-
-			// TODO : print best score?
-			//ImGui::Text( "Best Score: " );
+			if(_game_state == game_state::loose) {
+					ImGui::Text("Good try, you will make it next time!");
+			}
 		}
 		ImGui::End();
 
