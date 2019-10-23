@@ -356,7 +356,6 @@ edaf80::Assignment5::run()
 	float dory_path_pos = 0.0f;
 	float dory_velocity = 0.1f;
 
-
 	/* --------------------------------- Set up path for mines ---------------------------------------*/
 	glm::vec3 point_i( -20, -15, 0 ), point_j; // position of mine, point i describing a path, j=i+1
 	for(size_t i = 0; i < mines_number/2; i+=2)
@@ -528,8 +527,6 @@ edaf80::Assignment5::run()
 			// increase dory postion using her velocity
 			dory_path_pos += dory_velocity;
 		}
-
-		// Move mines
 		
 		// Move Nemo
 		nemo_node.get_transform().SetTranslate( _camera.mWorld.GetTranslation() + nemo_camera_translation );
@@ -585,7 +582,7 @@ edaf80::Assignment5::run()
 				else {
 					ImGui::Text("Dory is getting away, hurry up!");
 				}
-				ImGui::Text("Distance : %.0f cm", dory_path_pos);
+				ImGui::Text("Distance : %.0f cm", nemo_node.distance(dory_node));
 				ImGui::Text("Time : %.0f s", time);
 			}
 			if (_game_state == game_state::win) {
@@ -598,7 +595,7 @@ edaf80::Assignment5::run()
 				ImGui::Text("You failed hitting a mine!");
 			}
 			if (_game_state == game_state::loose_distance) {
-				ImGui::Text("You failed, Dorry got to far away");
+				ImGui::Text("You failed, Dory got to far away");
 			}
 			if (_game_state == game_state::pause) {
 				ImGui::Text("Game paused, press space to continue");
