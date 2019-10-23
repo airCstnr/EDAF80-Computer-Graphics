@@ -204,7 +204,7 @@ edaf80::Assignment5::run()
 	bonobo::mesh_data const& mine = mine_object.front();
 
 	// Load nemo
-	std::vector<bonobo::mesh_data> const nemo_object = bonobo::loadObjects( "nemo.obj" );
+	std::vector<bonobo::mesh_data> const nemo_object = bonobo::loadObjects( "nemo.fbx" );
 	if(nemo_object.empty()) {
 		LogError( "Failed to load the nemo model" );
 		return;
@@ -290,10 +290,8 @@ edaf80::Assignment5::run()
 	// Set up node for nemo
 	auto nemo_node = Node();
 	nemo_node.set_geometry( nemo );
-	nemo_node.set_program( &_phong_shader, nemo_set_uniforms );
-	nemo_node.get_transform().SetScale( 0.1 );
-	//nemo_node.get_transform().SetTranslate( glm::vec3( -2.5, -15, -10 ) );
-	auto nemo_camera_translation = glm::vec3( -2.5, -15, -10 );
+	nemo_node.set_program( &_dory_shader, nemo_set_uniforms );
+	auto nemo_camera_translation = glm::vec3( -1, -7, -10 );
 	nemo_node.get_transform().RotateY( -glm::half_pi<float>() );
 	nemo_node.set_hitbox_radius( 5 );
 
@@ -325,6 +323,10 @@ edaf80::Assignment5::run()
 	// Load dory texture
 	GLuint const dory_texture = bonobo::loadTexture2D("dory_texture.jpg");
 	dory_node.add_texture("dory_texture", dory_texture, GL_TEXTURE_2D);
+
+	// Load nemo texture
+	GLuint const nemo_texture = bonobo::loadTexture2D( "lambert1_Base_Color.png" );
+	nemo_node.add_texture( "dory_texture", nemo_texture, GL_TEXTURE_2D );
 
 	// Load countdown textures
 	GLuint const number_three_texture = bonobo::loadTexture2D("three.png");
