@@ -34,7 +34,7 @@ out VS_OUT {
 //} w1, w2;
 
 // one other way to do it is fixing values in vertex shader
-uniform float amplitude[2] = {1.0, 0.5};
+uniform float amplitude[2] = {2.0, 0.5};
 uniform float frequency[2] = {0.2, 0.4};
 uniform float phase[2]     = {0.5, 1.3};
 uniform float sharpness[2] = {2.0, 2.0};

@@ -21,7 +21,7 @@ uniform vec3 light_position;			//defined in world space
 uniform float time;						// current time elapsed
 
 // Uniforms for computing wave derivatives
-uniform float amplitude[2] = {1.0, 0.5};
+uniform float amplitude[2] = {2.0, 0.5};
 uniform float frequency[2] = {0.2, 0.4};
 uniform float phase[2]     = {0.5, 1.3};
 uniform float sharpness[2] = {2.0, 2.0};
