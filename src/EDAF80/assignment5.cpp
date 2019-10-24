@@ -417,10 +417,9 @@ edaf80::Assignment5::run()
 		}
 		fpsSamples++;
 
+	
 		// Increment time for waves movement
-		if(_game_state != game_state::pause || _game_state != game_state::begin) {  // don't increment time if game is paused or not started
 		time += 0.01;
-		}
 
 		// Game logic if current state is begin ("loading" before game start to give player a chance to prepare")
 		if (_game_state == game_state::begin) {
@@ -459,7 +458,7 @@ edaf80::Assignment5::run()
 			}
 		}
 
-		/*
+		
 		// Update variables according to game state
 		switch(_game_state)
 		{
@@ -469,14 +468,6 @@ edaf80::Assignment5::run()
 			default:
 				enable_dory_motion = false;
 				break;
-		}
-		*/
-
-		if (_game_state == game_state::play) {
-			enable_dory_motion = true;
-		}
-		else {
-			enable_dory_motion = false;
 		}
 
 		auto& io = ImGui::GetIO();
