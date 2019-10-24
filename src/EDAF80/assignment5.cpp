@@ -360,7 +360,7 @@ edaf80::Assignment5::run()
 
 	/* --------------------------------- Set up path for mines ---------------------------------------*/
 	glm::vec3 point_i( -20, -15, 0 ), point_j; // position of mine, point i describing a path, j=i+1
-	for(size_t i = 0; i < mines_number/2; i+=2)
+	for(size_t i = 0; i < mines_number; i+=2)
 	{
 		// create random position for mine using last position and cubic path
 		point_i = point_i + glm::vec3( -25.0f + 50.0f * (float( rand() ) / float( RAND_MAX )), 3*sin(i), -30);
